@@ -1,36 +1,67 @@
-interface IParent<T> {
-    setParent(parent: T): void;
-
-    getParent(): T | undefined;
+interface IPosition {
+    setPosition(position: String): void;
+    getPosition(): String;
 }
 
-export class SmartArray<T extends IParent<R>, R, S> implements IParent<S> {
+// node in tree
+export class SmartArray<T extends IPosition> implements IPosition {
     items: T[] = [];
     itemsPosition: Map<T, number> = new Map<T, number>();
-    parent?: S;
+    position: String = "";
 
-    setParent(parent: S) {
-        this.parent = parent;
+    private refreshAllChildrenPositions() {
+        const prefix = (this.position === "") ? "" : this.position + ".";
+
+        this.items.forEach((item, index) => {
+            item.setPosition(prefix +
+                // add 1 to have it 1-based
+                (index + 1))
+        });
     }
 
-    getParent(): S | undefined {
-        return this.parent;
+    setPosition(position: String) {
+        if (this.position !== position) {
+            this.position = position;
+            // if there's any change it will recursively notify the children
+            this.refreshAllChildrenPositions();
+        }
     }
+
+    getPosition() { return this.position; }
 
     push(item: T) {
-        this.add(item, this.items.length);
+        this.add(item,
+            // +1 because add() takes 1-based indexes
+            this.items.length + 1);
     }
 
+    /** position is 1-based */
     add(item: T, position: number) {
-        this.items.splice(position, 0, item);
-        this.itemsPosition.set(item, position);
-        item.setParent(this);
+        if (position > 0) {
+            const zeroBasedPosition = position - 1;
+            this.items.splice(zeroBasedPosition, 0, item);
+            this.itemsPosition.set(item, zeroBasedPosition);
+            // since we might be moving various children, refresh them all
+            this.refreshAllChildrenPositions();
+        }
+    }
+
+    // move an existing item to a new position
+    // this will shift the elements to its right
+    move(item: T, newPosition: number) {
+        this.remove(item);
+        this.add(item, newPosition);
+        // NB: this will retrigger the computation of the children position twice.
+        // maybe as future improvement pass a flag to say if such recomputation should be
+        // triggered or not
     }
 
     remove(item: T) {
-        const pos = this.itemsPosition.get(item);
-        if (pos !== undefined) {
-            this.items.splice(pos, 1)
+        const position = this.itemsPosition.get(item);
+        if (position !== undefined) {
+            this.items.splice(position, 1)
+            // since we might be moving various children, refresh them all
+            this.refreshAllChildrenPositions();
         }
     }
 
@@ -39,39 +70,43 @@ export class SmartArray<T extends IParent<R>, R, S> implements IParent<S> {
     }
 }
 
-export class Step extends SmartArray<Note, Step, Journey> {
+export class Step extends SmartArray<Note> {
 
 }
 
-export class Journey extends SmartArray<Step, Journey, AllJourneys> {
+export class Journey extends SmartArray<Step> {
 
 }
 
-export class AllJourneys extends SmartArray<Journey, AllJourneys, AllJourneys> {
+export class AllJourneys extends SmartArray<Journey> {
 
 }
 
-export class Version implements IParent<AllVersions> {
+export class Version implements IPosition {
     notes: Set<Note> = new Set<Note>();
-    allVersions: AllVersions | undefined;
+    position: String = "";
+    name: String;
 
-    getParent(): AllVersions | undefined {
-        return this.allVersions;
+    constructor(name: String) {
+        this.name = name;
     }
 
-    setParent(parent: AllVersions): void {
-        this.allVersions = parent;
-    }
+    setPosition(position: String): void { this.position = position; }
+    getPosition(): String { return this.position; }
+    addNote(note: Note) { this.notes.add(note); }
+
+    toString(): String { return this.position + '(' + this.name + ')'; }
 }
 
-export class AllVersions extends SmartArray<Version, AllVersions, AllVersions> {
+export class AllVersions extends SmartArray<Version> {
 
 }
 
-export class Note implements IParent<Step> {
+export class Note implements IPosition {
     name: String;
     step: Step;
     version: Version;
+    position: String = "";
 
     constructor(name: String, step: Step, version: Version) {
         this.name = name;
@@ -79,18 +114,13 @@ export class Note implements IParent<Step> {
         this.version = version;
     }
 
-    getParent(): Step | undefined {
-        return this.step;
-    }
+    setPosition(position: String): void { this.position = position; }
+    getPosition(): String { return this.position; }
 
-    setParent(parent: Step): void {
-        this.step = parent;
-    }
+    toString(): String { return this.position + "(" + this.name + ")"; }
 }
 
 export class StoryMapper {
     journeys: AllJourneys = new AllJourneys();
     versions: AllVersions = new AllVersions();
-
-
 }
