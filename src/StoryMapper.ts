@@ -1,16 +1,37 @@
-export class SmartArray<T> {
+interface IParent<T> {
+    setParent(parent: T): void;
+
+    getParent(): T | undefined;
+}
+
+export class SmartArray<T extends IParent<R>, R, S> implements IParent<S> {
     items: T[] = [];
+    itemsPosition: Map<T, number> = new Map<T, number>();
+    parent?: S;
+
+    setParent(parent: S) {
+        this.parent = parent;
+    }
+
+    getParent(): S | undefined {
+        return this.parent;
+    }
 
     push(item: T) {
-        this.items.push(item);
+        this.add(item, this.items.length);
     }
 
     add(item: T, position: number) {
         this.items.splice(position, 0, item);
+        this.itemsPosition.set(item, position);
+        item.setParent(this);
     }
 
     remove(item: T) {
-        this.items = this.items.filter((a: T) => a !== item);
+        const pos = this.itemsPosition.get(item);
+        if (pos !== undefined) {
+            this.items.splice(pos, 1)
+        }
     }
 
     toString(): String {
@@ -18,94 +39,58 @@ export class SmartArray<T> {
     }
 }
 
-// allow to maintain items in a list and reorder them
-interface ISortable {
-    getPosition(): number;
+export class Step extends SmartArray<Note, Step, Journey> {
 
-    getName(): String;
 }
 
-class Sortable implements ISortable {
-    position: number;
+export class Journey extends SmartArray<Step, Journey, AllJourneys> {
+
+}
+
+export class AllJourneys extends SmartArray<Journey, AllJourneys, AllJourneys> {
+
+}
+
+export class Version implements IParent<AllVersions> {
+    notes: Set<Note> = new Set<Note>();
+    allVersions: AllVersions | undefined;
+
+    getParent(): AllVersions | undefined {
+        return this.allVersions;
+    }
+
+    setParent(parent: AllVersions): void {
+        this.allVersions = parent;
+    }
+}
+
+export class AllVersions extends SmartArray<Version, AllVersions, AllVersions> {
+
+}
+
+export class Note implements IParent<Step> {
     name: String;
-
-    constructor(position: number, name: String) {
-        this.position = position;
-        this.name = name;
-    }
-
-    getPosition(): number {
-        return this.position;
-    }
-
-    getName(): String {
-        return this.name;
-    }
-}
-
-class SortableSet<T extends Sortable> {
-    items: Set<T> = new Set<T>();
-    list: T[] = [];
-    // track if list needs to be rebuilt
-    dirty: boolean = false;
-
-    add(item: T) {
-        this.dirty = true;
-        this.items.add(item);
-    }
-
-    remove(item: T): void {
-        this.dirty = true;
-        this.items.delete(item);
-    }
-
-    getList(): T[] {
-        if (this.dirty) {
-            // recompute list only when needed
-            this.dirty = false;
-            this.list = Array.from(this.items).sort((a: T, b: T) => a.position - b.position);
-        }
-        return this.list;
-    }
-
-}
-
-// the note that describes the actual work
-export class Note extends Sortable {
     step: Step;
     version: Version;
 
-    constructor(position: number, name: String, step: Step, version: Version) {
-        super(position, name);
+    constructor(name: String, step: Step, version: Version) {
+        this.name = name;
         this.step = step;
         this.version = version;
     }
-}
 
-class SortableSetSortable extends SortableSet<Note> implements ISortable {
-    sortable: Sortable;
-
-    constructor(position: number, name: String) {
-        super();
-        this.sortable = new Sortable(position, name);
+    getParent(): Step | undefined {
+        return this.step;
     }
 
-    add(note: Note) {
-        this.add(note);
-    }
-
-    getName(): String {
-        return this.sortable.getName();
-    }
-
-    getPosition(): number {
-        return this.sortable.getPosition();
+    setParent(parent: Step): void {
+        this.step = parent;
     }
 }
 
-class Version extends SortableSetSortable {
-}
+export class StoryMapper {
+    journeys: AllJourneys = new AllJourneys();
+    versions: AllVersions = new AllVersions();
 
-class Step extends SortableSetSortable {
-}
 
+}
