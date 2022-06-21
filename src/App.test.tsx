@@ -1,4 +1,4 @@
-import { SmartArray, Version, Journey, Step, Note, AllJourneys, NotesInSteps } from "./StoryMapper";
+import { SmartArray, Version, Journey, Step, Note, AllJourneys, NotesInSteps, AllVersions } from "./StoryMapper";
 
 describe("Smart Array", () => {
   const a = "a";
@@ -72,12 +72,9 @@ describe("tree, no version", () => {
   describe("basic", () => {
     const aj = new AllJourneys();
     const v = new Version("version 1", aj);
-    const j = new Journey();
-    aj.push(j);
-    const s = new Step();
-    j.push(s);
-    const n = new Note("a", s, v);
-    s.push(n);
+    const j = new Journey(aj);
+    const s = new Step(j);
+    const n = new Note("a", s, v, true);
 
     it('result', () => {
       expect(aj.toString()).toEqual("[[[1.1.1(a)]]]");
@@ -95,12 +92,9 @@ describe("tree, no version", () => {
   describe("move", () => {
     const aj = new AllJourneys();
     const v = new Version("version 1", aj);
-    const j = new Journey();
-    aj.push(j);
-    const s = new Step();
-    j.push(s);
-    const n = new Note("a", s, v);
-    s.push(n);
+    const j = new Journey(aj);
+    const s = new Step(j);
+    const n = new Note("a", s, v, true);
 
     it('result', () => {
       expect(aj.toString()).toEqual("[[[1.1.1(a)]]]");
@@ -121,12 +115,9 @@ describe("NotesInStep", () => {
   const aj = new AllJourneys();
   const j = new Journey();
   const v = new Version("a", aj);
-  const s1 = new Step();
-  j.push(s1);
-  const s2 = new Step();
-  j.push(s2);
-  const s3 = new Step();
-  j.push(s3);
+  const s1 = new Step(j);
+  const s2 = new Step(j);
+  const s3 = new Step(j);
 
   const notes: Set<Note> = new Set<Note>([
     new Note("a", s1, v, true),
@@ -145,4 +136,33 @@ describe("NotesInStep", () => {
   it("size", () => {
     expect(nis.getMaxSize()).toEqual(3);
   })
+});
+
+describe("version logic", () => {
+  const aj = new AllJourneys();
+  const j = new Journey(aj);
+  const s1 = new Step(j);
+  const s2 = new Step(j);
+  const s3 = new Step(j);
+
+  const av = new AllVersions();
+  const v1 = new Version("a", aj, av);
+  const v2 = new Version("b", aj, av);
+
+  new Note("a", s1, v1, true, true);
+  new Note("b", s1, v1, true, true);
+  new Note("c", s1, v1, true, true);
+  new Note("d", s1, v2, true, true);
+  new Note("e", s2, v2, true, true);
+  new Note("f", s3, v1, true, true);
+  new Note("g", s3, v2, true, true);
+
+  it('notes in string v1', () => {
+    expect(v1.toStringNotesInStep()).toEqual("1.1.1(a),1.1.2(b),1.1.3(c),,1.3.1(f)");
+  })
+
+  it('notes in string v2', () => {
+    expect(v2.toStringNotesInStep()).toEqual("1.1.4(d),1.2.1(e),1.3.2(g)");
+  })
+
 });
