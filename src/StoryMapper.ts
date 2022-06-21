@@ -5,9 +5,9 @@ interface IPosition {
 
 // node in tree
 export class SmartArray<T extends IPosition> implements IPosition {
-    items: T[] = [];
-    itemsPosition: Map<T, number> = new Map<T, number>();
-    position: String = "";
+    private items: T[] = [];
+    private itemsPosition: Map<T, number> = new Map<T, number>();
+    private position: String = "";
 
     private refreshAllChildrenPositions() {
         const prefix = (this.position === "") ? "" : this.position + ".";
@@ -18,6 +18,9 @@ export class SmartArray<T extends IPosition> implements IPosition {
                 (index + 1))
         });
     }
+
+    /** return shallow copy */
+    getItems() { return [...this.items]; }
 
     setPosition(position: String) {
         if (this.position !== position) {
@@ -82,20 +85,84 @@ export class AllJourneys extends SmartArray<Journey> {
 
 }
 
-export class Version implements IPosition {
-    notes: Set<Note> = new Set<Note>();
-    position: String = "";
-    name: String;
+/** used by Version to track the Notes in each Step */
+export class NotesInSteps {
+    /** the keys are the position of the Step and the Note */
+    private stepToNotes: Map<String, Map<String, Note>> = new Map();
+    private maxSize = 0;
+    private arrayArray: Array<Array<Note>> = new Array();
 
-    constructor(name: String) {
+    constructor(steps: Array<Step>, notes: Set<Note>) {
+        steps.forEach((step) => { this.addStep(step) });
+        notes.forEach((note) => { this.addNote(note) });
+        this.arrayArray = this.computeArrayArray();
+    }
+
+    /** add step. Used to add them all first */
+    private addStep(step: Step) {
+        this.stepToNotes.set(step.getPosition(), new Map());
+    }
+
+    private addNote(note: Note) {
+        const stepPosition = note.getStep().getPosition();
+        let notes = this.stepToNotes.get(stepPosition);
+        if (notes !== undefined) {
+            notes.set(note.getPosition(), note);
+        }
+    }
+
+    /** 
+     * compute the Array of Array that contains the notes. It is NOT a rectangle matrix
+     * the first array has one entry for each step
+     * the second has one entry for each note in that step
+     */
+    private computeArrayArray(): Array<Array<Note>> {
+        this.maxSize = 0;
+        const matrix = new Array<Array<Note>>();
+        const sortedSteps = new Map([...this.stepToNotes].sort());
+        sortedSteps.forEach((value) => {
+            const array = new Array<Note>();
+            // keep track of the longest
+            if (value.size > this.maxSize) {
+                this.maxSize = value.size;
+            }
+            matrix.push(array);
+            const sortedNotes = new Map([...value].sort());
+            sortedNotes.forEach((value) => {
+                array.push(value);
+            });
+        });
+        return matrix;
+    }
+
+    getArrayArray(): Array<Array<Note>> { return this.arrayArray; }
+
+    getMaxSize(): number { return this.maxSize; }
+}
+
+export class Version implements IPosition {
+    private notes: Set<Note> = new Set<Note>();
+    private position: String = "";
+    private name: String;
+    private allJourneys: AllJourneys;
+
+    constructor(name: String, allJourneys: AllJourneys) {
         this.name = name;
+        this.allJourneys = allJourneys;
     }
 
     setPosition(position: String): void { this.position = position; }
     getPosition(): String { return this.position; }
-    addNote(note: Note) { this.notes.add(note); }
+    addNote(note: Note) {
+        this.notes.add(note);
+    }
 
     toString(): String { return this.position + '(' + this.name + ')'; }
+
+    /** track the Notes per Step */
+    private rebuildInternalStructure() {
+
+    }
 }
 
 export class AllVersions extends SmartArray<Version> {
@@ -103,24 +170,30 @@ export class AllVersions extends SmartArray<Version> {
 }
 
 export class Note implements IPosition {
-    name: String;
-    step: Step;
-    version: Version;
-    position: String = "";
+    private name: String;
+    private step: Step;
+    private version: Version;
+    private position: String = "";
 
-    constructor(name: String, step: Step, version: Version) {
+    constructor(name: String, step: Step, version: Version, pushInStep: boolean = false) {
         this.name = name;
         this.step = step;
         this.version = version;
+
+        if (pushInStep) {
+            step.push(this);
+        }
     }
 
     setPosition(position: String): void { this.position = position; }
     getPosition(): String { return this.position; }
 
     toString(): String { return this.position + "(" + this.name + ")"; }
+
+    getStep(): Step { return this.step; }
 }
 
 export class StoryMapper {
-    journeys: AllJourneys = new AllJourneys();
-    versions: AllVersions = new AllVersions();
+    private journeys: AllJourneys = new AllJourneys();
+    private versions: AllVersions = new AllVersions();
 }
