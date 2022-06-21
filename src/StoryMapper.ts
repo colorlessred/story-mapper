@@ -1,5 +1,6 @@
 interface IPosition {
     setPosition(position: String): void;
+
     getPosition(): String;
 }
 
@@ -20,7 +21,9 @@ export class SmartArray<T extends IPosition> implements IPosition {
     }
 
     /** return shallow copy */
-    getItems(): T[] { return [...this.items]; }
+    getItems(): T[] {
+        return [...this.items];
+    }
 
     setPosition(position: String) {
         if (this.position !== position) {
@@ -30,7 +33,9 @@ export class SmartArray<T extends IPosition> implements IPosition {
         }
     }
 
-    getPosition() { return this.position; }
+    getPosition() {
+        return this.position;
+    }
 
     push(item: T) {
         this.add(item,
@@ -80,6 +85,7 @@ export class Step extends SmartArray<Note> implements ICard {
             journey.push(this);
         }
     }
+
     getName(): String {
         return "step";
     }
@@ -92,24 +98,30 @@ export class Journey extends SmartArray<Step> implements ICard {
             allJourneys.push(this);
         }
     }
+
     getName(): String {
         return "journey"
     }
 }
 
 /** root object that contains all the journeys */
-export class AllJourneys extends SmartArray<Journey> { }
+export class AllJourneys extends SmartArray<Journey> {
+}
 
 /** used by Version to track the Notes in each Step */
 export class NotesInSteps {
     /** the keys are the position of the Step and the Note */
     private stepToNotes: Map<String, Map<String, Note>> = new Map();
     private maxSize = 0;
-    private arrayArray: Array<Array<Note>> = new Array();
+    private readonly arrayArray: Array<Array<Note>> = [];
 
     constructor(steps: Array<Step>, notes: Set<Note>) {
-        steps.forEach((step) => { this.addStep(step) });
-        notes.forEach((note) => { this.addNote(note) });
+        steps.forEach((step) => {
+            this.addStep(step)
+        });
+        notes.forEach((note) => {
+            this.addNote(note)
+        });
         this.arrayArray = this.computeArrayArray();
     }
 
@@ -127,7 +139,7 @@ export class NotesInSteps {
         }
     }
 
-    /** 
+    /**
      * compute the Array of Array that contains the notes. It is NOT a rectangle matrix
      * the first array has one entry for each step
      * the second has one entry for each note in that step
@@ -154,16 +166,23 @@ export class NotesInSteps {
         return out;
     }
 
-    getArrayArray(): Array<Array<Note>> { return this.arrayArray; }
+    getArrayArray(): Array<Array<Note>> {
+        return this.arrayArray;
+    }
 
-    getMaxSize(): number { return this.maxSize; }
-    getStepsSize(): number { return this.stepToNotes.size; }
+    getMaxSize(): number {
+        return this.maxSize;
+    }
+
+    getStepsSize(): number {
+        return this.stepToNotes.size;
+    }
 }
 
 export class Version implements IPosition {
+    private readonly name: String;
     private notes: Set<Note> = new Set<Note>();
     private position: String = "";
-    private name: String;
     private allJourneys: AllJourneys;
     private notesInStep: NotesInSteps;
 
@@ -171,21 +190,29 @@ export class Version implements IPosition {
         this.name = name;
         this.allJourneys = allJourneys;
 
-        if (allVersions !== undefined) {
+        if (allVersions) {
             allVersions.push(this);
         }
 
         this.notesInStep = this.rebuildInternalStructure();
     }
 
-    setPosition(position: String): void { this.position = position; }
-    getPosition(): String { return this.position; }
+    setPosition(position: String): void {
+        this.position = position;
+    }
+
+    getPosition(): String {
+        return this.position;
+    }
+
     addNote(note: Note) {
         this.notes.add(note);
         this.rebuildInternalStructure();
     }
 
-    toString(): String { return this.position + '(' + this.name + ')'; }
+    toString(): String {
+        return this.position + '(' + this.name + ')';
+    }
 
     /** string representation of Notes in all the Steps */
     toStringNotesInStep(): String {
@@ -196,7 +223,9 @@ export class Version implements IPosition {
         }
     }
 
-    getNotesInSteps() { return this.notesInStep }
+    getNotesInSteps() {
+        return this.notesInStep
+    }
 
     /** build string representation that uses the position in the version step */
     toStringNotesWithVersionNumber(): String {
@@ -223,7 +252,9 @@ export class Version implements IPosition {
         // needs to be the root of all the journeys
         const allSteps: Step[] = [];
         this.allJourneys.getItems().forEach((journey) => {
-            journey.getItems().forEach((step) => { allSteps.push(step) });
+            journey.getItems().forEach((step) => {
+                allSteps.push(step)
+            });
         });
         this.notesInStep = new NotesInSteps(allSteps, this.notes);
         // return it so that it can be used in the constructor to avoid the "undefined" type
@@ -239,13 +270,14 @@ export class Version implements IPosition {
     }
 }
 
-export class AllVersions extends SmartArray<Version> { }
+export class AllVersions extends SmartArray<Version> {
+}
 
-export class Note implements IPosition {
-    private name: String;
-    private step: Step;
+export class Note implements IPosition, ICard {
+    private readonly name: String;
+    private readonly step: Step;
     private version: Version;
-    /** string that represents the whole hierchical position, journey.step.note */
+    /** string that represents the whole hierarchical position, journey.step.note */
 
     private position: String = "";
     /** track the position only inside the version step */
@@ -263,13 +295,22 @@ export class Note implements IPosition {
         this.step = step;
         this.version = version;
 
-        if (pushInStep) { step.push(this); }
+        if (pushInStep) {
+            step.push(this);
+        }
 
-        if (addToVersion) { version.addNote(this); }
+        if (addToVersion) {
+            version.addNote(this);
+        }
     }
 
-    setPosition(position: String): void { this.position = position; }
-    getPosition(): String { return this.position; }
+    setPosition(position: String): void {
+        this.position = position;
+    }
+
+    getPosition(): String {
+        return this.position;
+    }
 
     setPositionInVersionStep(position: number): void {
         this.positionInVersionStep = position;
@@ -278,17 +319,28 @@ export class Note implements IPosition {
             [this.getStep().getPosition(), this.version.getPosition(), this.positionInVersionStep].join('.');
     }
 
-    toString(): String { return this.position + "(" + this.name + ")"; }
-    toStringVersion(): String { return this.positionInVersionStepPath + "(" + this.name + ")"; }
+    toString(): string {
+        return this.position + "(" + this.name + ")";
+    }
 
-    getStep(): Step { return this.step; }
+    toStringVersion(): String {
+        return this.positionInVersionStepPath + "(" + this.name + ")";
+    }
+
+    getStep(): Step {
+        return this.step;
+    }
+
+    getName(): String {
+        return this.name;
+    }
 }
 
 interface ICard {
     getName(): String;
 }
 
-class EmptyCard implements ICard {
+class EmptyContent implements ICard {
     getName(): String {
         return "";
     }
@@ -303,19 +355,23 @@ export class Card {
     constructor(baseElement: ICard) {
         this.baseElement = baseElement;
     }
+
+    toString(): String {
+        return this.baseElement.getName();
+    }
 }
 
 /** the global board from which we will build the UI */
 export class Board {
-    private cards: Array<Array<Card>> = new Array();
-    private currentArray: Array<Card> = new Array();
+    private cards: Array<Array<Card>> = [];
+    private currentArray: Array<Card> = [];
     private startNewLine: boolean = false;
 
     /** add cards horizontally */
     addCard(card: Card) {
         if (this.startNewLine) {
             this.startNewLine = false;
-            this.currentArray = new Array();
+            this.currentArray = [];
         }
         this.currentArray.push(card);
     }
@@ -331,6 +387,19 @@ export class Board {
         this.cards.push(this.currentArray);
         this.startNewLine = true;
     }
+
+    toString(): string {
+        const out: String[] = [];
+        out.push('[');
+        this.cards.forEach((arrayCard) => {
+            out.push('[');
+            out.push(arrayCard.map((card) => card.toString()).join(','));
+            out.push(']');
+        });
+        out.push(']');
+
+        return out.join('');
+    }
 }
 
 /** class the represents the full model */
@@ -338,9 +407,13 @@ export class StoryMapper {
     private allJourneys: AllJourneys = new AllJourneys();
     private allVersions: AllVersions = new AllVersions();
 
-    addJourney(): Journey { return new Journey(this.allJourneys); }
+    addJourney(): Journey {
+        return new Journey(this.allJourneys);
+    }
 
-    addVersion(name: String): Version { return new Version(name, this.allJourneys, this.allVersions); }
+    addVersion(name: String): Version {
+        return new Version(name, this.allJourneys, this.allVersions);
+    }
 
     deleteJourney(journey: Journey): void {
         // TODO
@@ -352,7 +425,9 @@ export class StoryMapper {
         throw new Error("not implemented");
     }
 
-    addStep(journey: Journey): Step { return new Step(journey) }
+    addStep(journey: Journey): Step {
+        return new Step(journey)
+    }
 
     addNote(name: String, step: Step, version: Version): Note {
         return new Note(name, step, version, true, true);
@@ -364,27 +439,38 @@ export class StoryMapper {
         // row of journeys
         this.allJourneys.getItems().forEach((journey) => {
             journey.getItems().forEach((step, index) => {
-                const card = (index === 0) ? new Card(journey) : new Card(new EmptyCard());
+                const card = (index === 0) ? new Card(journey) : new Card(new EmptyContent());
                 board.addCard(card);
             });
         });
         board.endLine();
         // row of steps
         this.allJourneys.getItems().forEach((journey) => {
-            journey.getItems().forEach((step, index) => {
+            journey.getItems().forEach((step) => {
                 board.addCard(new Card(step));
             });
         });
-
+        board.endLine();
         // versions
         this.allVersions.getItems().forEach((version) => {
             const notesInSteps = version.getNotesInSteps();
+            /** longest notes in step */
             const rows = notesInSteps.getMaxSize();
+            /** number of steps */
+            const cols = notesInSteps.getStepsSize();
             const arrayArrayNotes = notesInSteps.getArrayArray();
-
-            // for (let i = 0; i++; i <)
-
-
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const arrayNotes: Note[] = arrayArrayNotes[col];
+                    if (row < arrayNotes.length) {
+                        const note: Note = arrayNotes[row];
+                        board.addCard(new Card(note));
+                    } else {
+                        board.addCard(new Card(new EmptyContent()));
+                    }
+                }
+                board.endLine();
+            }
         });
 
         return board;
