@@ -136,6 +136,10 @@ describe("NotesInStep", () => {
   it("size", () => {
     expect(nis.getMaxSize()).toEqual(3);
   })
+
+  it("steps size", () => {
+    expect(nis.getStepsSize()).toEqual(3);
+  })
 });
 
 describe("version logic", () => {
@@ -163,6 +167,18 @@ describe("version logic", () => {
 
   it('notes in string v2', () => {
     expect(v2.toStringNotesInStep()).toEqual("1.1.4(d),1.2.1(e),1.3.2(g)");
+  })
+
+  it('notes in string v1, version name', () => {
+    expect(v1.toStringNotesWithVersionNumber()).toEqual("[[1.1.1.1(a),1.1.1.2(b),1.1.1.3(c)][][1.3.1.1(f)]]");
+  })
+  
+  it('notes in string v2, version name', () => {
+    expect(v2.toStringNotesWithVersionNumber()).toEqual("[[1.1.2.1(d)][1.2.2.1(e)][1.3.2.1(g)]]");
+  })
+
+  it('steps size', () => {
+    expect(v2.getNotesInSteps().getStepsSize()).toEqual(3);
   })
 
 });

@@ -1,5 +1,5 @@
 # TODO
 
-- set the name of the note by using the Version position: journey.step.version.noteInVersion
-    - needs to add the `noteInVersion` to the Note
-
+- 🟨 build full application that produces the "visual matrix" with the boxes
+- add story points to Notes and roll up the sums
+    - might need to have children with links to the their parents (Note -> Step -> Journey)
