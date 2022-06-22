@@ -400,6 +400,10 @@ export class Board {
 
         return out.join('');
     }
+
+    getCards() {
+        return this.cards;
+    }
 }
 
 /** class the represents the full model */
