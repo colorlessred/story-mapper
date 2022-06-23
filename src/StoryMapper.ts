@@ -95,18 +95,22 @@ export class Step extends SmartArray<Note> implements ICard {
 }
 
 export class Journey extends SmartArray<Step> implements ICard {
-    constructor(allJourneys?: AllJourneys) {
+    allJourneys: AllJourneys;
+
+    constructor(allJourneys: AllJourneys) {
         super();
-        if (allJourneys) {
-            allJourneys.push(this);
-        }
+        this.allJourneys = allJourneys;
+        // if (allJourneys) {
+        allJourneys.push(this);
+        // }
     }
 
     getName(): String {
         return "journey"
     }
 
-    createNewNext(): void {
+    createNewNext(): Journey {
+        return new Journey(this.allJourneys);
     }
 }
 
