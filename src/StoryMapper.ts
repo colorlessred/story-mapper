@@ -87,7 +87,7 @@ export class Step extends SmartArray<Note> implements ICard {
     }
 
     getName(): String {
-        return "step";
+        return "s" + this.getPosition();
     }
 
     createNewNext(): void {
@@ -100,13 +100,11 @@ export class Journey extends SmartArray<Step> implements ICard {
     constructor(allJourneys: AllJourneys) {
         super();
         this.allJourneys = allJourneys;
-        // if (allJourneys) {
         allJourneys.push(this);
-        // }
     }
 
     getName(): String {
-        return "journey"
+        return "j" + this.getPosition();
     }
 
     createNewNext(): Journey {
@@ -469,21 +467,29 @@ export class StoryMapper {
         // version column
         board.addCard(new Card(new EmptyContent()));
         // row of journeys
-        this.allJourneys.getItems().forEach((journey) => {
-            journey.getItems().forEach((step, index) => {
-                const card = (index === 0) ? new Card(journey) : new Card(new EmptyContent());
-                board.addCard(card);
-            });
+        const stepCards: Card[] = [];
+        this.allJourneys.getItems().forEach((journey, rowIndex) => {
+            const itemsNum = journey.getItems().length;
+            // we need to add the cards even if the journey has no steps
+            const maxCols = Math.max(itemsNum, 1);
+            for (let colIndex = 0; colIndex < maxCols; colIndex++) {
+                if (colIndex === 0) {
+                    board.addCard(new Card(journey));
+                } else {
+                    board.addCard(new Card(new EmptyContent()));
+                }
+                if (colIndex < itemsNum) {
+                    stepCards.push(new Card(journey.getItems()[colIndex]));
+                } else {
+                    stepCards.push(new Card(new EmptyContent()));
+                }
+            }
         });
         board.endLine();
         // version column
         board.addCard(new Card(new EmptyContent()));
         // row of steps
-        this.allJourneys.getItems().forEach((journey) => {
-            journey.getItems().forEach((step) => {
-                board.addCard(new Card(step));
-            });
-        });
+        stepCards.forEach((card) => board.addCard(card));
         board.endLine();
         // versions
         this.allVersions.getItems().forEach((version) => {
