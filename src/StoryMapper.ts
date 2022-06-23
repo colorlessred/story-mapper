@@ -89,6 +89,9 @@ export class Step extends SmartArray<Note> implements ICard {
     getName(): String {
         return "step";
     }
+
+    createNewNext(): void {
+    }
 }
 
 export class Journey extends SmartArray<Step> implements ICard {
@@ -101,6 +104,9 @@ export class Journey extends SmartArray<Step> implements ICard {
 
     getName(): String {
         return "journey"
+    }
+
+    createNewNext(): void {
     }
 }
 
@@ -179,7 +185,7 @@ export class NotesInSteps {
     }
 }
 
-export class Version implements IPosition {
+export class Version implements IPosition, ICard {
     private readonly name: String;
     private notes: Set<Note> = new Set<Note>();
     private position: String = "";
@@ -268,6 +274,13 @@ export class Version implements IPosition {
             return 0;
         }
     }
+
+    getName(): String {
+        return this.name;
+    }
+
+    createNewNext(): void {
+    }
 }
 
 export class AllVersions extends SmartArray<Version> {
@@ -334,15 +347,24 @@ export class Note implements IPosition, ICard {
     getName(): String {
         return this.name;
     }
+
+    createNewNext(): void {
+    }
 }
 
 interface ICard {
     getName(): String;
+
+    /** create new item next to the current one */
+    createNewNext(): void;
 }
 
 class EmptyContent implements ICard {
     getName(): String {
         return "";
+    }
+
+    createNewNext(): void {
     }
 }
 
@@ -440,6 +462,8 @@ export class StoryMapper {
     /** loop over all the data and create the board */
     buildBoard(): Board {
         const board: Board = new Board();
+        // version column
+        board.addCard(new Card(new EmptyContent()));
         // row of journeys
         this.allJourneys.getItems().forEach((journey) => {
             journey.getItems().forEach((step, index) => {
@@ -448,6 +472,8 @@ export class StoryMapper {
             });
         });
         board.endLine();
+        // version column
+        board.addCard(new Card(new EmptyContent()));
         // row of steps
         this.allJourneys.getItems().forEach((journey) => {
             journey.getItems().forEach((step) => {
@@ -464,6 +490,11 @@ export class StoryMapper {
             const cols = notesInSteps.getStepsSize();
             const arrayArrayNotes = notesInSteps.getArrayArray();
             for (let row = 0; row < rows; row++) {
+                if (row === 0) {
+                    board.addCard(new Card(version));
+                } else {
+                    board.addCard(new Card(new EmptyContent()));
+                }
                 for (let col = 0; col < cols; col++) {
                     const arrayNotes: Note[] = arrayArrayNotes[col];
                     if (row < arrayNotes.length) {

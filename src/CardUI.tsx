@@ -8,6 +8,15 @@ interface Props {
 
 export const CardUI = ({card}: Props) => {
     return (
-        <td>{card.toString()}</td>
+        <td className="card">
+            <div className="content">
+                <div className="cardContent">
+                    {card.toString()}
+                </div>
+                <div className="controls">
+                    +
+                </div>
+            </div>
+        </td>
     )
 }

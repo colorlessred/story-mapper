@@ -219,6 +219,19 @@ describe("story mapper", () => {
 
     it('board', () => {
         expect(sm.buildBoard().toString())
-            .toEqual("[[journey,,,journey][step,step,step,step][a,b,f,][,c,,][,g,,d][,,,e]]");
+            .toEqual("[[,journey,,,journey][,step,step,step,step][v1,a,b,f,][,,c,,][v2,,g,,d][,,,,e]]");
     });
+});
+
+describe("add next", () => {
+   describe("journey", () => {
+       const sm = new StoryMapper();
+       const j1 = sm.addJourney();
+       const j2 = sm.addJourney();
+       it('board', () => {
+           expect(sm.buildBoard().toString())
+               .toEqual("[[,journey,,,journey][,step,step,step,step][v1,a,b,f,][,,c,,][v2,,g,,d][,,,,e]]");
+       });
+   });
+
 });
