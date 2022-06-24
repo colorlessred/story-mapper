@@ -14,7 +14,7 @@ export class StoryMapper {
     private allVersions: AllVersions = new AllVersions();
 
     addJourney(): Journey {
-        return new Journey(this.allJourneys);
+        return new Journey(this.allJourneys, true);
     }
 
     addVersion(name: String): Version {

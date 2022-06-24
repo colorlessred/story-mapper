@@ -73,6 +73,30 @@ describe("Smart Array", () => {
         });
     });
 
+    describe("addNext b after a in [a]", () => {
+        const sa = new SmartArray<Version>();
+        const a = new Version("a", aj);
+        sa.push(a);
+        sa.addNextTo(new Version("b", aj), a);
+
+        it('next', () => {
+            expect(sa.toString()).toEqual("[1(a),2(b)]");
+        });
+
+    });
+
+    describe("addNext c after a in [a,b]", () => {
+        const sa = new SmartArray<Version>();
+        const a = new Version("a", aj);
+        sa.push(a);
+        sa.push(new Version("b", aj));
+        sa.addNextTo(new Version("c", aj), a);
+
+        it('next', () => {
+            expect(sa.toString()).toEqual("[1(a),2(c),3(b)]");
+        });
+
+    });
 
 });
 
@@ -81,7 +105,7 @@ describe("tree, no version", () => {
     describe("basic", () => {
         const aj = new AllJourneys();
         const v = new Version("version 1", aj);
-        const j = new Journey(aj);
+        const j = new Journey(aj, true);
         const s = new Step(j);
         const n = new Note("a", s, v, true);
 
@@ -104,7 +128,7 @@ describe("tree, no version", () => {
         it("result", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj);
+            const j = new Journey(aj, true);
             const s = new Step(j);
             new Note("a", s, v, true);
             expect(aj.toString()).toEqual("[[[1.1.1(a)]]]");
@@ -114,29 +138,30 @@ describe("tree, no version", () => {
         it("add second journey", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj);
+            const j = new Journey(aj, true);
             const s = new Step(j);
             new Note("a", s, v, true);
-            const j2 = new Journey(aj);
+            const j2 = new Journey(aj, true);
             expect(aj.toString()).toEqual("[[[1.1.1(a)]],[]]");
         });
 
         it('move second journey', () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj);
+            const j = new Journey(aj, true);
             const s = new Step(j);
             new Note("a", s, v, true);
-            const j2 = new Journey(aj);
+            const j2 = new Journey(aj, true);
             aj.move(j2, 1);
             expect(aj.toString()).toEqual("[[],[[2.1.1(a)]]]");
+            expect(j2.getPositionInParent()).toEqual(0);
         })
     });
 });
 
 describe("NotesInStep", () => {
     const aj = new AllJourneys();
-    const j = new Journey(aj);
+    const j = new Journey(aj, true);
     const v = new Version("a", aj);
     const s1 = new Step(j);
     new Step(j);
@@ -167,7 +192,7 @@ describe("NotesInStep", () => {
 
 describe("version logic", () => {
     const aj = new AllJourneys();
-    const j = new Journey(aj);
+    const j = new Journey(aj, true);
     const s1 = new Step(j);
     const s2 = new Step(j);
     const s3 = new Step(j);
@@ -231,9 +256,15 @@ describe("story mapper", () => {
     new Note("f", s1_3, v1, true, true);
     new Note("g", s1_2, v2, true, true);
 
+
     it('board', () => {
         expect(sm.buildBoard().toString())
             .toEqual("[[,j1,,,j2][,s1.1,s1.2,s1.3,s2.1][v1,a,b,f,][,,c,,][v2,,g,,d][,,,,e]]");
+        expect(j1.getPositionInParent()).toEqual(0);
+        expect(s1_1.getPositionInParent()).toEqual(0);
+        expect(s1_2.getPositionInParent()).toEqual(1);
+        expect(s1_3.getPositionInParent()).toEqual(2);
+        expect(s1_1.getPositionInParent()).toEqual(0);
     });
 });
 
@@ -277,7 +308,7 @@ describe("add next", () => {
         it('board', () => {
             expect(sm.buildBoard().toString())
                 // TO FIX
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,,s3.1]]");
+                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,,s3.1]]");
         });
     });
 

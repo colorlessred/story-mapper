@@ -6,13 +6,15 @@ import {Step} from "./Step";
 export class Journey extends SmartArray<Step> implements ICard {
     allJourneys: AllJourneys;
 
-    constructor(allJourneys: AllJourneys, position?: number) {
+    constructor(allJourneys: AllJourneys, addToAllJourneys: boolean = false, position?: number) {
         super();
         this.allJourneys = allJourneys;
-        if (position === undefined) {
-            allJourneys.push(this);
-        } else {
-            allJourneys.add(this, position);
+        if (addToAllJourneys) {
+            if (position === undefined) {
+                allJourneys.push(this);
+            } else {
+                allJourneys.add(this, position);
+            }
         }
     }
 
@@ -21,6 +23,8 @@ export class Journey extends SmartArray<Step> implements ICard {
     }
 
     createNewNext(): Journey {
-        return new Journey(this.allJourneys);
+        const out: Journey = new Journey(this.allJourneys, false);
+        this.allJourneys.addNextTo(out, this);
+        return out;
     }
 }

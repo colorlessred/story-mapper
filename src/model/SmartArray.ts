@@ -1,9 +1,20 @@
-// node in the journey-step-note tree
 import {IPath} from "./IPath";
 
+/**
+ * Node in the journey-step-note tree
+ */
 export class SmartArray<T extends IPath> implements IPath {
     private items: T[] = [];
+    /**
+     * track where the items are, to remove them efficiently
+     * @private
+     */
     private itemsPosition: Map<T, number> = new Map<T, number>();
+    /**
+     * represent hierarchical path. When a parent is modified it will trigger the modification
+     * of all its children
+     * @private
+     */
     private path: String = "";
     private positionInParent: number = 0;
 
@@ -11,9 +22,9 @@ export class SmartArray<T extends IPath> implements IPath {
         const prefix = (this.path === "") ? "" : this.path + ".";
 
         this.items.forEach((item, index) => {
-            item.setPath(prefix +
-                // add 1 to have it 1-based
-                (index + 1))
+            const oneBasedIndex = index + 1;
+            item.setPath(prefix + oneBasedIndex);
+            item.setPositionInParent(index);
         });
     }
 
@@ -38,6 +49,23 @@ export class SmartArray<T extends IPath> implements IPath {
         this.add(item,
             // +1 because add() takes 1-based indexes
             this.items.length + 1);
+    }
+
+    /**
+     * add the newItem next to the existingItem
+     * @param newItem
+     * @param existingItem
+     */
+    addNextTo(newItem: T, existingItem: T) {
+        const positionExisting = this.itemsPosition.get(existingItem);
+        if (positionExisting !== undefined) {
+            // positionExisting is zero-based, while the param
+            // in add() is one-based, so we need the "+2" to
+            // get the next position
+            this.add(newItem, positionExisting + 2);
+        } else {
+            throw new Error("item doesn't belong to this SmartArray");
+        }
     }
 
     /** position is 1-based */
@@ -67,6 +95,8 @@ export class SmartArray<T extends IPath> implements IPath {
             this.items.splice(position, 1)
             // since we might be moving various children, refresh them all
             this.refreshAllChildrenPaths();
+        } else {
+            throw new Error("item to remove doesn't belong to this SmartArray");
         }
     }
 
