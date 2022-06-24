@@ -6,6 +6,11 @@ import {Note} from "./Note";
 import {IPath} from "./IPath";
 import {Step} from "./Step";
 
+/**
+ * not a good design. The internal structure depends on the data on all journeys and versions.
+ * These can change (e.g. when adding a new Journey), without the Version realising.
+ * So we need to recompute it all every time we need to use the notesInStep object
+ */
 export class Version implements IPath, ICard {
     private readonly name: String;
     private notes: Set<Note> = new Set<Note>();
@@ -44,6 +49,7 @@ export class Version implements IPath, ICard {
 
     /** string representation of Notes in all the Steps */
     toStringNotesInStep(): String {
+        this.rebuildInternalStructure()
         if (this.notesInStep) {
             return this.notesInStep.getArrayArray().toString();
         } else {
@@ -52,11 +58,13 @@ export class Version implements IPath, ICard {
     }
 
     getNotesInSteps() {
+        this.rebuildInternalStructure()
         return this.notesInStep
     }
 
     /** build string representation that uses the position in the version step */
     toStringNotesWithVersionNumber(): String {
+        this.rebuildInternalStructure()
         const out: String[] = [];
         if (this.notesInStep) {
             out.push('[');

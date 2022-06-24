@@ -1,6 +1,6 @@
 # Doing
 
-2022.06.23: adding "add next" function, writing tests
+2022.06.24: fix test: create next journey, with notes
 
 # TODO
 

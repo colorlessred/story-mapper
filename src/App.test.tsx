@@ -105,8 +105,10 @@ describe("tree, no version", () => {
     describe("basic", () => {
         const aj = new AllJourneys();
         const v = new Version("version 1", aj);
-        const j = new Journey(aj, true);
+        const j = new Journey(aj);
         const s = new Step(j);
+        aj.push(j);
+
         const n = new Note("a", s, v, true);
 
         it('result', () => {
@@ -123,13 +125,12 @@ describe("tree, no version", () => {
     });
 
     describe("move", () => {
-
-
         it("result", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj, true);
+            const j = new Journey(aj);
             const s = new Step(j);
+            aj.push(j);
             new Note("a", s, v, true);
             expect(aj.toString()).toEqual("[[[1.1.1(a)]]]");
         });
@@ -138,22 +139,30 @@ describe("tree, no version", () => {
         it("add second journey", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj, true);
+            const j = new Journey(aj);
             const s = new Step(j);
+            aj.push(j);
             new Note("a", s, v, true);
-            const j2 = new Journey(aj, true);
-            expect(aj.toString()).toEqual("[[[1.1.1(a)]],[]]");
+            const j2 = new Journey(aj);
+            new Step(j2);
+            aj.push(j2);
+
+            expect(aj.toString()).toEqual("[[[1.1.1(a)]],[[]]]");
         });
 
         it('move second journey', () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj, true);
+            const j = new Journey(aj);
             const s = new Step(j);
+            aj.push(j);
             new Note("a", s, v, true);
-            const j2 = new Journey(aj, true);
+            const j2 = new Journey(aj);
+            new Step(j2);
+            aj.push(j2);
+
             aj.move(j2, 1);
-            expect(aj.toString()).toEqual("[[],[[2.1.1(a)]]]");
+            expect(aj.toString()).toEqual("[[[]],[[2.1.1(a)]]]");
             expect(j2.getPositionInParent()).toEqual(0);
         })
     });
@@ -161,10 +170,11 @@ describe("tree, no version", () => {
 
 describe("NotesInStep", () => {
     const aj = new AllJourneys();
-    const j = new Journey(aj, true);
+    const j = new Journey(aj);
     const v = new Version("a", aj);
     const s1 = new Step(j);
-    new Step(j);
+    aj.push(j);
+    new Step(j); // step2
     const s3 = new Step(j);
 
     const notes: Set<Note> = new Set<Note>([
@@ -192,10 +202,11 @@ describe("NotesInStep", () => {
 
 describe("version logic", () => {
     const aj = new AllJourneys();
-    const j = new Journey(aj, true);
+    const j = new Journey(aj);
     const s1 = new Step(j);
     const s2 = new Step(j);
     const s3 = new Step(j);
+    aj.push(j);
 
     const av = new AllVersions();
     const v1 = new Version("a", aj, av);
@@ -233,12 +244,15 @@ describe("version logic", () => {
 
 describe("story mapper", () => {
     const sm = new StoryMapper();
-    const j1 = sm.addJourney();
-    const j2 = sm.addJourney();
+    const j1 = sm.newJourney();
+    const j2 = sm.newJourney();
     const s1_1 = new Step(j1);
     const s1_2 = new Step(j1);
     const s1_3 = new Step(j1);
     const s2_1 = new Step(j2);
+    sm.attachJourney(j1);
+    sm.attachJourney(j2);
+
     const v1 = sm.addVersion("v1");
     const v2 = sm.addVersion("v2");
     /**
@@ -269,17 +283,19 @@ describe("story mapper", () => {
 });
 
 describe("add next", () => {
-    function prep(): [StoryMapper, Journey, Journey] {
+    function prep(): [StoryMapper, Journey, Journey, Step, Step, Version, Version] {
         const sm = new StoryMapper();
-        const j1 = sm.addJourney();
-        const j2 = sm.addJourney();
+        const j1 = sm.newJourney();
+        const j2 = sm.newJourney();
         const s1_1 = new Step(j1);
         const s1_2 = new Step(j1);
         const s1_3 = new Step(j1);
         const s2_1 = new Step(j2);
+        sm.attachJourney(j1);
+        sm.attachJourney(j2);
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
-        return [sm, j1, j2];
+        return [sm, j1, j2, s1_1, s1_2, v1, v2];
     }
 
     describe("journey", () => {
@@ -297,7 +313,7 @@ describe("add next", () => {
         // j2 is last so there will be a j3 created
         it('board', () => {
             expect(sm.buildBoard().toString())
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,]]");
+                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1]]");
         });
     });
 
@@ -308,8 +324,21 @@ describe("add next", () => {
         it('board', () => {
             expect(sm.buildBoard().toString())
                 // TO FIX
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,,s3.1]]");
+                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1]]");
         });
     });
+
+    describe("create next journey, with notes", () => {
+        const [sm, j1, j2, s1_1, s1_2, v1, v2] = prep();
+        new Note("n", s1_1, v1, true, true);
+        j1.createNewNext();
+        // it will create one intermediate entry between j1 and j2
+        it('board', () => {
+            expect(sm.buildBoard().toString())
+                // TO FIX
+                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1][v1,n,,,,]]");
+        });
+    });
+
 
 });

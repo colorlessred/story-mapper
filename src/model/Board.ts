@@ -21,7 +21,8 @@ export class Board {
         if (this.cards.length > 0) {
             const columns = this.cards[0].length;
             if (this.currentArray.length != columns) {
-                throw new Error(`The first row had ${columns} columns, but the current row has ${this.currentArray.length}`)
+                throw new Error(`The first row had ${columns} columns, but the ` +
+                    `current row (index ${this.cards.length}) has ${this.currentArray.length}`)
             }
         }
         this.cards.push(this.currentArray);

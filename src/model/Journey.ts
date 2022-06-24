@@ -6,16 +6,9 @@ import {Step} from "./Step";
 export class Journey extends SmartArray<Step> implements ICard {
     allJourneys: AllJourneys;
 
-    constructor(allJourneys: AllJourneys, addToAllJourneys: boolean = false, position?: number) {
+    constructor(allJourneys: AllJourneys) {
         super();
         this.allJourneys = allJourneys;
-        if (addToAllJourneys) {
-            if (position === undefined) {
-                allJourneys.push(this);
-            } else {
-                allJourneys.add(this, position);
-            }
-        }
     }
 
     getName(): String {
@@ -23,8 +16,9 @@ export class Journey extends SmartArray<Step> implements ICard {
     }
 
     createNewNext(): Journey {
-        const out: Journey = new Journey(this.allJourneys, false);
-        this.allJourneys.addNextTo(out, this);
-        return out;
+        const journey: Journey = new Journey(this.allJourneys);
+        new Step(journey);
+        this.allJourneys.addNextTo(journey, this);
+        return journey;
     }
 }

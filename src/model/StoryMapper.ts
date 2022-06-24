@@ -13,8 +13,12 @@ export class StoryMapper {
     private allJourneys: AllJourneys = new AllJourneys();
     private allVersions: AllVersions = new AllVersions();
 
-    addJourney(): Journey {
-        return new Journey(this.allJourneys, true);
+    newJourney(): Journey {
+        return new Journey(this.allJourneys);
+    }
+
+    attachJourney(journey:Journey){
+        this.allJourneys.push(journey);
     }
 
     addVersion(name: String): Version {

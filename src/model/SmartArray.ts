@@ -18,6 +18,10 @@ export class SmartArray<T extends IPath> implements IPath {
     private path: String = "";
     private positionInParent: number = 0;
 
+    public isEmpty(): boolean {
+        return this.items.length === 0
+    }
+
     private refreshAllChildrenPaths() {
         const prefix = (this.path === "") ? "" : this.path + ".";
 
@@ -101,7 +105,8 @@ export class SmartArray<T extends IPath> implements IPath {
     }
 
     toString(): String {
-        return "[" + this.items.toString() + "]";
+        const itemsString = this.items.toString();
+        return `[${itemsString}]`;
     }
 
     getPositionInParent(): number {
