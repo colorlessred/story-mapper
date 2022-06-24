@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {Card} from "./StoryMapper";
+import {Card} from "./model/Card";
 
 interface Props {
     card: Card;

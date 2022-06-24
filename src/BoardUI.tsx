@@ -1,7 +1,9 @@
 import React, {useRef, useState} from 'react';
 import './App.css';
-import {Board, Card, StoryMapper} from "./StoryMapper";
+import {StoryMapper} from "./model/StoryMapper";
 import {CardUI} from "./CardUI";
+import {Card} from "./model/Card";
+import {Board} from "./model/Board";
 
 const Row = (arrayCard: Card[], index: number) => {
     console.log("row " + index);

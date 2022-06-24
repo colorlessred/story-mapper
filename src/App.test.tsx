@@ -1,14 +1,14 @@
 import {
-    SmartArray,
-    Version,
-    Journey,
-    Step,
-    Note,
-    AllJourneys,
-    NotesInSteps,
-    AllVersions,
     StoryMapper
-} from "./StoryMapper";
+} from "./model/StoryMapper";
+import {SmartArray} from "./model/SmartArray";
+import {Version} from "./model/Version";
+import {AllVersions} from "./model/AllVersions";
+import {NotesInSteps} from "./model/NotesInSteps";
+import {AllJourneys} from "./model/AllJourneys";
+import {Note} from "./model/Note";
+import {Journey} from "./model/Journey";
+import {Step} from "./model/Step";
 
 describe("Smart Array", () => {
     const aj = new AllJourneys();
@@ -263,6 +263,7 @@ describe("add next", () => {
     describe("create last journey", () => {
         const [sm, j1, j2] = prep();
         j2.createNewNext();
+        // j2 is last so there will be a j3 created
         it('board', () => {
             expect(sm.buildBoard().toString())
                 .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,]]");
@@ -272,6 +273,7 @@ describe("add next", () => {
     describe("create next journey", () => {
         const [sm, j1, j2] = prep();
         j1.createNewNext();
+        // it will create one intermediate entry between j1 and j2
         it('board', () => {
             expect(sm.buildBoard().toString())
                 // TO FIX
