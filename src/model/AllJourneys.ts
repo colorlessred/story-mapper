@@ -6,6 +6,7 @@ export class AllJourneys extends SmartArray<Journey> {
     /**
      * add Journey. It must have some Step linked,
      * otherwise we would have a board missing a column
+     * position is 1-based
      * @param journey
      * @param position
      */

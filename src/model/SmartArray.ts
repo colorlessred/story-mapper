@@ -22,6 +22,10 @@ export class SmartArray<T extends IPath> implements IPath {
         return this.items.length === 0
     }
 
+    public alreadyContains(item: T) {
+        return this.itemsPosition.has(item);
+    }
+
     private refreshAllChildrenPaths() {
         const prefix = (this.path === "") ? "" : this.path + ".";
 
@@ -74,6 +78,9 @@ export class SmartArray<T extends IPath> implements IPath {
 
     /** position is 1-based */
     add(item: T, position: number) {
+        if (this.alreadyContains(item)) {
+            throw new Error("Cannot add item already present");
+        }
         if (position > 0) {
             const zeroBasedPosition: number = position - 1;
             this.items.splice(zeroBasedPosition, 0, item);
@@ -86,6 +93,9 @@ export class SmartArray<T extends IPath> implements IPath {
     // move an existing item to a new position
     // this will shift the elements to its right
     move(item: T, newPosition: number) {
+        if (!this.alreadyContains(item)) {
+            throw new Error("Cannot move item that is not already present");
+        }
         this.remove(item);
         this.add(item, newPosition);
         // NB: this will trigger the recomputation of the children position twice.
@@ -97,6 +107,7 @@ export class SmartArray<T extends IPath> implements IPath {
         const position = this.itemsPosition.get(item);
         if (position !== undefined) {
             this.items.splice(position, 1)
+            this.itemsPosition.delete(item);
             // since we might be moving various children, refresh them all
             this.refreshAllChildrenPaths();
         } else {

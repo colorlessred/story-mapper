@@ -105,9 +105,8 @@ describe("tree, no version", () => {
     describe("basic", () => {
         const aj = new AllJourneys();
         const v = new Version("version 1", aj);
-        const j = new Journey(aj);
-        const s = new Step(j);
-        aj.push(j);
+        const s = new Step();
+        const j = new Journey(aj, s);
 
         const n = new Note("a", s, v, true);
 
@@ -128,9 +127,8 @@ describe("tree, no version", () => {
         it("result", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj);
-            const s = new Step(j);
-            aj.push(j);
+            const s = new Step();
+            const j = new Journey(aj, s);
             new Note("a", s, v, true);
             expect(aj.toString()).toEqual("[[[1.1.1(a)]]]");
         });
@@ -139,13 +137,10 @@ describe("tree, no version", () => {
         it("add second journey", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj);
-            const s = new Step(j);
-            aj.push(j);
+            const s = new Step();
+            const j = new Journey(aj, s);
             new Note("a", s, v, true);
-            const j2 = new Journey(aj);
-            new Step(j2);
-            aj.push(j2);
+            const j2 = new Journey(aj, new Step());
 
             expect(aj.toString()).toEqual("[[[1.1.1(a)]],[[]]]");
         });
@@ -153,13 +148,10 @@ describe("tree, no version", () => {
         it('move second journey', () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
-            const j = new Journey(aj);
-            const s = new Step(j);
-            aj.push(j);
+            const s = new Step();
+            const j = new Journey(aj, s);
             new Note("a", s, v, true);
-            const j2 = new Journey(aj);
-            new Step(j2);
-            aj.push(j2);
+            const j2 = new Journey(aj, new Step());
 
             aj.move(j2, 1);
             expect(aj.toString()).toEqual("[[[]],[[2.1.1(a)]]]");
@@ -170,10 +162,9 @@ describe("tree, no version", () => {
 
 describe("NotesInStep", () => {
     const aj = new AllJourneys();
-    const j = new Journey(aj);
+    const s1 = new Step();
+    const j = new Journey(aj, s1);
     const v = new Version("a", aj);
-    const s1 = new Step(j);
-    aj.push(j);
     new Step(j); // step2
     const s3 = new Step(j);
 
@@ -202,11 +193,10 @@ describe("NotesInStep", () => {
 
 describe("version logic", () => {
     const aj = new AllJourneys();
-    const j = new Journey(aj);
-    const s1 = new Step(j);
+    const s1 = new Step();
+    const j = new Journey(aj, s1);
     const s2 = new Step(j);
     const s3 = new Step(j);
-    aj.push(j);
 
     const av = new AllVersions();
     const v1 = new Version("a", aj, av);
@@ -246,12 +236,10 @@ describe("story mapper", () => {
     const sm = new StoryMapper();
     const j1 = sm.newJourney();
     const j2 = sm.newJourney();
-    const s1_1 = new Step(j1);
+    const s1_1 = j1.getFirstStep();
     const s1_2 = new Step(j1);
     const s1_3 = new Step(j1);
-    const s2_1 = new Step(j2);
-    sm.attachJourney(j1);
-    sm.attachJourney(j2);
+    const s2_1 = j2.getFirstStep();
 
     const v1 = sm.addVersion("v1");
     const v2 = sm.addVersion("v2");
@@ -287,18 +275,16 @@ describe("add next", () => {
         const sm = new StoryMapper();
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
-        const s1_1 = new Step(j1);
+        const s1_1 = j1.getFirstStep();
         const s1_2 = new Step(j1);
         const s1_3 = new Step(j1);
-        const s2_1 = new Step(j2);
-        sm.attachJourney(j1);
-        sm.attachJourney(j2);
+        const s2_1 = j2.getFirstStep();
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
         return [sm, j1, j2, s1_1, s1_2, v1, v2];
     }
 
-    describe("journey", () => {
+    describe("default story map", () => {
             const [sm] = prep();
             it('board', () => {
                 expect(sm.buildBoard().toString())
