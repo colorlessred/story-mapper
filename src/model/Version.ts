@@ -5,6 +5,7 @@ import {AllJourneys} from "./AllJourneys";
 import {Note} from "./Note";
 import {IPath} from "./IPath";
 import {Step} from "./Step";
+import {CardType} from "./Card";
 
 /**
  * not a good design. The internal structure depends on the data on all journeys and versions.
@@ -110,5 +111,9 @@ export class Version implements IPath, ICard {
 
     setPositionInParent(position: number): void {
         this.positionInParent = position;
+    }
+
+    getType(): CardType {
+        return CardType.Version;
     }
 }

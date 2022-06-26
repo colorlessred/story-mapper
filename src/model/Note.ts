@@ -2,6 +2,7 @@ import {ICard} from "./ICard";
 import {Version} from "./Version";
 import {IPath} from "./IPath";
 import {Step} from "./Step";
+import {CardType} from "./Card";
 
 export class Note implements IPath, ICard {
     private readonly name: String;
@@ -77,5 +78,9 @@ export class Note implements IPath, ICard {
 
     setPositionInParent(position: number): void {
         this.positionInParent = position;
+    }
+
+    getType(): CardType {
+        return CardType.Note;
     }
 }

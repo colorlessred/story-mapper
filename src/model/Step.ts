@@ -2,6 +2,7 @@ import {SmartArray} from "./SmartArray";
 import {Note} from "./Note";
 import {ICard} from "./ICard";
 import {Journey} from "./Journey";
+import {CardType} from "./Card";
 
 export class Step extends SmartArray<Note> implements ICard {
     constructor(journey?: Journey) {
@@ -16,5 +17,9 @@ export class Step extends SmartArray<Note> implements ICard {
     }
 
     createNewNext(): void {
+    }
+
+    getType(): CardType {
+        return CardType.Step;
     }
 }

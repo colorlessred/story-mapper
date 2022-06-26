@@ -10,7 +10,17 @@ export class Card {
         this.baseElement = baseElement;
     }
 
+    getType(): String {
+        return CardType[this.baseElement.getType()];
+    }
+
     toString(): String {
         return this.baseElement.getName();
     }
+
+    createNewNext():void {
+        this.baseElement.createNewNext();
+    }
 }
+
+export enum CardType {Empty, Journey, Step, Note, Version};

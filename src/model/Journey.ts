@@ -2,6 +2,7 @@ import {SmartArray} from "./SmartArray";
 import {ICard} from "./ICard";
 import {AllJourneys} from "./AllJourneys";
 import {Step} from "./Step";
+import {CardType} from "./Card";
 
 export class Journey extends SmartArray<Step> implements ICard {
     allJourneys: AllJourneys;
@@ -44,5 +45,9 @@ export class Journey extends SmartArray<Step> implements ICard {
     createNewNext(): Journey {
         // position in parent is zero-based, while adding we use 1-based, so it needs "+2"
         return new Journey(this.allJourneys, new Step(), this.getPositionInParent() + 2);
+    }
+
+    getType(): CardType {
+        return CardType.Journey;
     }
 }

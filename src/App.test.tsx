@@ -258,10 +258,17 @@ describe("story mapper", () => {
     new Note("f", s1_3, v1, true, true);
     new Note("g", s1_2, v2, true, true);
 
+    let hookCalled = false;
+
+    sm.setBoardRefreshHook(() => {
+        hookCalled = true;
+    })
 
     it('board', () => {
+        expect(hookCalled).toEqual(false);
         expect(sm.buildBoard().toString())
             .toEqual("[[,j1,,,j2][,s1.1,s1.2,s1.3,s2.1][v1,a,b,f,][,,c,,][v2,,g,,d][,,,,e]]");
+        expect(hookCalled).toEqual(true);
         expect(j1.getPositionInParent()).toEqual(0);
         expect(s1_1.getPositionInParent()).toEqual(0);
         expect(s1_2.getPositionInParent()).toEqual(1);

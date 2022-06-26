@@ -12,13 +12,11 @@ import {Step} from "./Step";
 export class StoryMapper {
     private allJourneys: AllJourneys = new AllJourneys();
     private allVersions: AllVersions = new AllVersions();
+    private boardRefreshHook: (board: Board) => void = (board: Board) => {
+    };
 
     newJourney(): Journey {
         return new Journey(this.allJourneys, new Step());
-    }
-
-    attachJourney(journey:Journey){
-        this.allJourneys.push(journey);
     }
 
     addVersion(name: String): Version {
@@ -43,8 +41,16 @@ export class StoryMapper {
         return new Note(name, step, version, true, true);
     }
 
+    /**
+     * set the action that will be performed when the board is refreshed
+     * @param fn
+     */
+    setBoardRefreshHook(fn: (board: Board) => void): void {
+        this.boardRefreshHook = fn;
+    }
+
     /** loop over all the data and create the board */
-    buildBoard(): Board {
+    buildBoard(callHooks: boolean = true): Board {
         const board: Board = new Board();
         // version column
         board.addCard(new Card(new EmptyContent()));
@@ -99,6 +105,11 @@ export class StoryMapper {
                 board.endLine();
             }
         });
+
+        if (callHooks) {
+            // execute the hook. This can be used by the UI to cause the page refresh
+            this.boardRefreshHook(board);
+        }
 
         return board;
     }
