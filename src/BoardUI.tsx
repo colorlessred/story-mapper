@@ -5,10 +5,10 @@ import {CardUI} from "./CardUI";
 import {Card} from "./model/Card";
 import {Board} from "./model/Board";
 
-const Row = (arrayCard: Card[], index: number) => {
+const Row = (arrayCard: Card[], index: number, storyMapper: StoryMapper) => {
     console.log("row " + index);
     return (<tr key={`row-${index}`}>
-        {arrayCard.map((card) => <CardUI card={card}></CardUI>)}
+        {arrayCard.map((card) => <CardUI card={card} storyMapper={storyMapper}></CardUI>)}
     </tr>)
 }
 
@@ -17,17 +17,19 @@ interface Props {
 }
 
 export function BoardUI({storyMapper}: Props) {
+    const [board, setBoard] = useState<Board>(storyMapper.buildBoard(false));
 
-    const [board, setBoard] = useState<Board>(storyMapper.buildBoard());
+    const refresh = (board: Board) => {
+        setBoard(board);
+    }
+    storyMapper.setBoardRefreshHook(refresh);
 
     const addJourney = () => {
         storyMapper.newJourney();
-        setBoard(storyMapper.buildBoard());
+        storyMapper.buildBoard();
     }
 
     const populateBoard = () => {
-        const oldBoard = storyMapper.buildBoard();
-        console.log(`old: ${oldBoard.getCards().length}`);
         const j1 = storyMapper.newJourney();
         const j2 = storyMapper.newJourney();
         const s1 = storyMapper.addStep(j1);
@@ -40,17 +42,14 @@ export function BoardUI({storyMapper}: Props) {
         storyMapper.addNote("note", s1, v2);
         storyMapper.addNote("note", s1, v2);
         storyMapper.addNote("note", s2, v1);
-
-        // console.log(`new: ${newBoard.getCards().length}`);
-        // console.log(newBoard.toString());
-        setBoard(storyMapper.buildBoard());
+        storyMapper.buildBoard();
     }
 
     return (
         <>
             <table className="board">
                 <tbody>
-                {board.getCards().map((arrayCard, index) => Row(arrayCard, index))}
+                {board.getCards().map((arrayCard, index) => Row(arrayCard, index, storyMapper))}
                 </tbody>
             </table>
             <button onClick={populateBoard}>populate board</button>

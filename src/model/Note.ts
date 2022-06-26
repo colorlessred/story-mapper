@@ -2,6 +2,7 @@ import {ICard} from "./ICard";
 import {Version} from "./Version";
 import {IPath} from "./IPath";
 import {Step} from "./Step";
+import {CardType} from "./Card";
 
 export class Note implements IPath, ICard {
     private readonly name: String;
@@ -65,10 +66,12 @@ export class Note implements IPath, ICard {
     }
 
     getName(): String {
-        return this.name;
+        return `n${this.pathWithVersion}`;
     }
 
     createNewNext(): void {
+        const newNote = new Note("new note", this.step, this.version, false, true);
+        this.step.add(newNote, this.getPositionInParent() + 2);
     }
 
     getPositionInParent(): number {
@@ -77,5 +80,9 @@ export class Note implements IPath, ICard {
 
     setPositionInParent(position: number): void {
         this.positionInParent = position;
+    }
+
+    getType(): CardType {
+        return CardType.Note;
     }
 }

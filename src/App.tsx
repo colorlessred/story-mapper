@@ -7,7 +7,6 @@ function App() {
     const storyMapper = useRef(new StoryMapper());
     return (
         <div className="App">
-            App!
             <BoardUI storyMapper={storyMapper.current}></BoardUI>
         </div>
     );

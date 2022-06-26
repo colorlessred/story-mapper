@@ -258,10 +258,16 @@ describe("story mapper", () => {
     new Note("f", s1_3, v1, true, true);
     new Note("g", s1_2, v2, true, true);
 
+    let hookCalled = false;
+
+    sm.setBoardRefreshHook(() => {
+        hookCalled = true;
+    })
 
     it('board', () => {
+        expect(hookCalled).toEqual(false);
         expect(sm.buildBoard().toString())
-            .toEqual("[[,j1,,,j2][,s1.1,s1.2,s1.3,s2.1][v1,a,b,f,][,,c,,][v2,,g,,d][,,,,e]]");
+        expect(hookCalled).toEqual(true);
         expect(j1.getPositionInParent()).toEqual(0);
         expect(s1_1.getPositionInParent()).toEqual(0);
         expect(s1_2.getPositionInParent()).toEqual(1);
@@ -288,7 +294,7 @@ describe("add next", () => {
             const [sm] = prep();
             it('board', () => {
                 expect(sm.buildBoard().toString())
-                    .toEqual("[[,j1,,,j2][,s1.1,s1.2,s1.3,s2.1]]");
+                    .toEqual("[[,j1,,,j2][,s1.1,s1.2,s1.3,s2.1][v1,,,,][v2,,,,]]");
             })
         }
     );
@@ -299,7 +305,7 @@ describe("add next", () => {
         // j2 is last so there will be a j3 created
         it('board', () => {
             expect(sm.buildBoard().toString())
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1]]");
+                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1][v1,,,,,][v2,,,,,]]");
         });
     });
 
@@ -309,8 +315,7 @@ describe("add next", () => {
         // it will create one intermediate entry between j1 and j2
         it('board', () => {
             expect(sm.buildBoard().toString())
-                // TO FIX
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1]]");
+                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1][v1,,,,,][v2,,,,,]]");
         });
     });
 
@@ -321,10 +326,17 @@ describe("add next", () => {
         // it will create one intermediate entry between j1 and j2
         it('board', () => {
             expect(sm.buildBoard().toString())
-                // TO FIX
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1][v1,n,,,,]]");
+                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1][v1,n1.1.1.1,,,,][v2,,,,,]]");
         });
     });
 
+    describe("version", () => {
+        const [sm, j1, j2, s1_1, s1_2, v1, v2] = prep();
+        v1.createNewNext();
+        it('board', () => {
+            expect(sm.buildBoard().toString())
+                .toEqual("[[,j1,,,j2][,s1.1,s1.2,s1.3,s2.1][v1,,,,][new Version,,,,][v2,,,,]]");
+        })
+    });
 
 });

@@ -5,6 +5,7 @@ import {AllJourneys} from "./AllJourneys";
 import {Note} from "./Note";
 import {IPath} from "./IPath";
 import {Step} from "./Step";
+import {CardType} from "./Card";
 
 /**
  * not a good design. The internal structure depends on the data on all journeys and versions.
@@ -16,15 +17,21 @@ export class Version implements IPath, ICard {
     private notes: Set<Note> = new Set<Note>();
     private path: String = "";
     private positionInParent: number = 0;
-    private allJourneys: AllJourneys;
+    private readonly allJourneys: AllJourneys;
     private notesInStep: NotesInSteps;
+    private readonly allVersions?: AllVersions;
 
-    constructor(name: String, allJourneys: AllJourneys, allVersions?: AllVersions) {
+    constructor(name: String, allJourneys: AllJourneys, allVersions?: AllVersions, position?: number) {
         this.name = name;
         this.allJourneys = allJourneys;
 
         if (allVersions) {
-            allVersions.push(this);
+            this.allVersions = allVersions;
+            if (position !== undefined) {
+                allVersions.add(this, position);
+            } else {
+                allVersions.push(this);
+            }
         }
 
         this.notesInStep = this.rebuildInternalStructure();
@@ -49,7 +56,7 @@ export class Version implements IPath, ICard {
 
     /** string representation of Notes in all the Steps */
     toStringNotesInStep(): String {
-        this.rebuildInternalStructure()
+        this.rebuildInternalStructure();
         if (this.notesInStep) {
             return this.notesInStep.getArrayArray().toString();
         } else {
@@ -58,13 +65,13 @@ export class Version implements IPath, ICard {
     }
 
     getNotesInSteps() {
-        this.rebuildInternalStructure()
-        return this.notesInStep
+        this.rebuildInternalStructure();
+        return this.notesInStep;
     }
 
     /** build string representation that uses the position in the version step */
     toStringNotesWithVersionNumber(): String {
-        this.rebuildInternalStructure()
+        this.rebuildInternalStructure();
         const out: String[] = [];
         if (this.notesInStep) {
             out.push('[');
@@ -73,7 +80,7 @@ export class Version implements IPath, ICard {
                 const notes: String[] = [];
                 array.forEach((note) => {
                     notes.push(note.toStringVersion());
-                })
+                });
                 out.push(notes.join(','));
                 out.push(']');
             });
@@ -89,7 +96,7 @@ export class Version implements IPath, ICard {
         const allSteps: Step[] = [];
         this.allJourneys.getItems().forEach((journey) => {
             journey.getItems().forEach((step) => {
-                allSteps.push(step)
+                allSteps.push(step);
             });
         });
         this.notesInStep = new NotesInSteps(allSteps, this.notes);
@@ -102,6 +109,11 @@ export class Version implements IPath, ICard {
     }
 
     createNewNext(): void {
+        if (this.allVersions === undefined) {
+            throw new Error("Cannot create new next Version if I don't know the AllVersions");
+        }
+
+        new Version("new Version", this.allJourneys, this.allVersions, this.positionInParent + 2);
     }
 
     getPositionInParent(): number {
@@ -110,5 +122,9 @@ export class Version implements IPath, ICard {
 
     setPositionInParent(position: number): void {
         this.positionInParent = position;
+    }
+
+    getType(): CardType {
+        return CardType.Version;
     }
 }

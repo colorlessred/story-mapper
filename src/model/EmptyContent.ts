@@ -1,4 +1,5 @@
 import {ICard} from "./ICard";
+import {CardType} from "./Card";
 
 export class EmptyContent implements ICard {
     getName(): String {
@@ -6,5 +7,9 @@ export class EmptyContent implements ICard {
     }
 
     createNewNext(): void {
+    }
+
+    getType(): CardType {
+        return CardType.Empty;
     }
 }

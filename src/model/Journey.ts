@@ -2,6 +2,7 @@ import {SmartArray} from "./SmartArray";
 import {ICard} from "./ICard";
 import {AllJourneys} from "./AllJourneys";
 import {Step} from "./Step";
+import {CardType} from "./Card";
 
 export class Journey extends SmartArray<Step> implements ICard {
     allJourneys: AllJourneys;
@@ -16,6 +17,7 @@ export class Journey extends SmartArray<Step> implements ICard {
     constructor(allJourneys: AllJourneys, step: Step, position?: number) {
         super();
         this.push(step);
+        step.setJourney(this);
         this.allJourneys = allJourneys;
         if (position !== undefined) {
             this.allJourneys.add(this, position);
@@ -41,8 +43,12 @@ export class Journey extends SmartArray<Step> implements ICard {
     /**
      * create journey with empty step
      */
-    createNewNext(): Journey {
+    createNewNext(): void {
         // position in parent is zero-based, while adding we use 1-based, so it needs "+2"
-        return new Journey(this.allJourneys, new Step(), this.getPositionInParent() + 2);
+        new Journey(this.allJourneys, new Step(), this.getPositionInParent() + 2);
+    }
+
+    getType(): CardType {
+        return CardType.Journey;
     }
 }
