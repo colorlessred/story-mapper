@@ -34,7 +34,7 @@ export class StoryMapper {
     }
 
     addStep(journey: Journey): Step {
-        return new Step(journey)
+        return new Step(journey);
     }
 
     addNote(name: String, step: Step, version: Version): Note {
@@ -82,8 +82,8 @@ export class StoryMapper {
         // versions
         this.allVersions.getItems().forEach((version) => {
             const notesInSteps = version.getNotesInSteps();
-            /** longest notes in step */
-            const rows = notesInSteps.getMaxSize();
+            /** longest notes in step, or 1 if none */
+            const rows = Math.max(notesInSteps.getMaxSize(), 1);
             /** number of steps */
             const cols = notesInSteps.getStepsSize();
             const arrayArrayNotes = notesInSteps.getArrayArray();

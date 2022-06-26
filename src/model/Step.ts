@@ -5,11 +5,22 @@ import {Journey} from "./Journey";
 import {CardType} from "./Card";
 
 export class Step extends SmartArray<Note> implements ICard {
-    constructor(journey?: Journey) {
+    private journey?: Journey;
+
+    constructor(journey?: Journey, position?: number) {
         super();
         if (journey) {
-            journey.push(this);
+            this.journey = journey;
+            if (position !== undefined) {
+                journey.add(this, position);
+            } else {
+                journey.push(this);
+            }
         }
+    }
+
+    setJourney(journey: Journey) {
+        this.journey = journey;
     }
 
     getName(): String {
@@ -17,6 +28,10 @@ export class Step extends SmartArray<Note> implements ICard {
     }
 
     createNewNext(): void {
+        if (this.journey === undefined) {
+            throw new Error("cannot create next Step since I don't know the journey");
+        }
+        new Step(this.journey, this.getPositionInParent() + 2);
     }
 
     getType(): CardType {

@@ -66,10 +66,12 @@ export class Note implements IPath, ICard {
     }
 
     getName(): String {
-        return this.name;
+        return `n${this.pathWithVersion}`;
     }
 
     createNewNext(): void {
+        const newNote = new Note("new note", this.step, this.version, false, true);
+        this.step.add(newNote, this.getPositionInParent() + 2);
     }
 
     getPositionInParent(): number {
