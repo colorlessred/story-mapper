@@ -51,4 +51,9 @@ export class Journey extends SmartArray<Step> implements ICard {
     getType(): CardType {
         return CardType.Journey;
     }
+
+    showControls(): boolean {
+        return true;
+    }
+
 }

@@ -24,4 +24,12 @@ export class EmptyAdder implements ICard {
     getType(): CardType {
         return CardType.Empty;
     }
+
+    showControls(): boolean {
+        return true;
+    }
+
+    getKey(): String {
+        return "";
+    }
 }

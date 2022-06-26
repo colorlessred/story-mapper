@@ -1,22 +1,22 @@
 # Doing
 
-2022.06.24: fix test: create next journey, with notes
-
 # TODO
 
 - UI
-  - add journey
-  - add step
-  - add note
-  - delete journey
-  - delete step
-  - delete note
-  - move journey
-  - move step
-  - move note
+    - unique key in cards (ICard)
+    - delete journey, step, note, version
+    - move journey, step, note, version
+    - serializer / deserializer
+        - create minimal structure that describes the content
+    -
 - edit
-  - journey
-  - step
-  - note
+    - journey, step, note, version
+    - fields
+        - title
+        - description
+        - story points
+        - images
+        - dependencies
 - add story points to Notes and roll up the sums
     - might need to have children with links to the their parents (Note -> Step -> Journey)
+- web service to save

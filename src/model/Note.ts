@@ -85,4 +85,8 @@ export class Note implements IPath, ICard {
     getType(): CardType {
         return CardType.Note;
     }
+
+    showControls(): boolean {
+        return true;
+    }
 }

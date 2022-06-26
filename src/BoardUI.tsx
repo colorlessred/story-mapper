@@ -5,15 +5,15 @@ import {CardUI} from "./CardUI";
 import {Card} from "./model/Card";
 import {Board} from "./model/Board";
 
+
 const Row = (arrayCard: Card[], index: number, storyMapper: StoryMapper) => {
-    console.log("row " + index);
     return (<tr key={`row-${index}`}>
         {arrayCard.map((card) => <CardUI card={card} storyMapper={storyMapper}></CardUI>)}
-    </tr>)
-}
+    </tr>);
+};
 
 interface Props {
-    storyMapper: StoryMapper
+    storyMapper: StoryMapper;
 }
 
 export function BoardUI({storyMapper}: Props) {
@@ -21,13 +21,8 @@ export function BoardUI({storyMapper}: Props) {
 
     const refresh = (board: Board) => {
         setBoard(board);
-    }
+    };
     storyMapper.setBoardRefreshHook(refresh);
-
-    const addJourney = () => {
-        storyMapper.newJourney();
-        storyMapper.buildBoard();
-    }
 
     const populateBoard = () => {
         const j1 = storyMapper.newJourney();
@@ -43,7 +38,7 @@ export function BoardUI({storyMapper}: Props) {
         storyMapper.addNote("note", s1, v2);
         storyMapper.addNote("note", s2, v1);
         storyMapper.buildBoard();
-    }
+    };
 
     return (
         <>
@@ -53,8 +48,7 @@ export function BoardUI({storyMapper}: Props) {
                 </tbody>
             </table>
             <button onClick={populateBoard}>populate board</button>
-            <button onClick={addJourney}>add journey</button>
         </>
-    )
+    );
 }
 

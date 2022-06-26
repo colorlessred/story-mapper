@@ -18,8 +18,12 @@ export class Card {
         return this.baseElement.getName();
     }
 
-    createNewNext():void {
+    createNewNext(): void {
         this.baseElement.createNewNext();
+    }
+
+    showControls(): boolean {
+        return this.baseElement.showControls();
     }
 }
 

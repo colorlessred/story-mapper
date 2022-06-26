@@ -12,4 +12,8 @@ export class EmptyContent implements ICard {
     getType(): CardType {
         return CardType.Adder;
     }
+
+    showControls(): boolean {
+        return false;
+    }
 }

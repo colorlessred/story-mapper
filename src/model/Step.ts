@@ -37,4 +37,8 @@ export class Step extends SmartArray<Note> implements ICard {
     getType(): CardType {
         return CardType.Step;
     }
+
+    showControls(): boolean {
+        return true;
+    }
 }

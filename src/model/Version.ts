@@ -127,4 +127,8 @@ export class Version implements IPath, ICard {
     getType(): CardType {
         return CardType.Version;
     }
+
+    showControls(): boolean {
+        return true;
+    }
 }
