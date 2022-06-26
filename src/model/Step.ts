@@ -24,7 +24,7 @@ export class Step extends SmartArray<Note> implements ICard {
     }
 
     getName(): String {
-        return "s" + this.getPath();
+        return `S${this.getPath()}`;
     }
 
     createNewNext(): void {

@@ -105,7 +105,7 @@ export class Version implements IPath, ICard {
     }
 
     getName(): String {
-        return this.name;
+        return `V${this.getPath()}`;
     }
 
     createNewNext(): void {

@@ -7,6 +7,9 @@ import {AllJourneys} from "./AllJourneys";
 import {Note} from "./Note";
 import {Journey} from "./Journey";
 import {Step} from "./Step";
+import {EmptyAdder} from "./EmptyAdder";
+import {NotesInSteps} from "./NotesInSteps";
+import {ICard} from "./ICard";
 
 /** class the represents the full model */
 export class StoryMapper {
@@ -81,7 +84,7 @@ export class StoryMapper {
         board.endLine();
         // versions
         this.allVersions.getItems().forEach((version) => {
-            const notesInSteps = version.getNotesInSteps();
+            const notesInSteps: NotesInSteps = version.getNotesInSteps();
             /** longest notes in step, or 1 if none */
             const rows = Math.max(notesInSteps.getMaxSize(), 1);
             /** number of steps */
@@ -98,6 +101,12 @@ export class StoryMapper {
                     if (row < arrayNotes.length) {
                         const note: Note = arrayNotes[row];
                         board.addCard(new Card(note));
+                    } else if (row === 0) {
+                        // first card in a version/step that has no notes
+                        // => create special card that allows for creation of
+                        // a note in this version/step
+                        const card: ICard = new EmptyAdder(version, notesInSteps.getStep(col));
+                        board.addCard(new Card(card));
                     } else {
                         board.addCard(new Card(new EmptyContent()));
                     }

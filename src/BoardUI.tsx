@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useState} from 'react';
 import './App.css';
 import {StoryMapper} from "./model/StoryMapper";
 import {CardUI} from "./CardUI";

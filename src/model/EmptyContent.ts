@@ -10,6 +10,6 @@ export class EmptyContent implements ICard {
     }
 
     getType(): CardType {
-        return CardType.Empty;
+        return CardType.Adder;
     }
 }

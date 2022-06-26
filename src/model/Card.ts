@@ -23,4 +23,4 @@ export class Card {
     }
 }
 
-export enum CardType {Empty, Journey, Step, Note, Version};
+export enum CardType {Empty, Adder, Journey, Step, Note, Version};

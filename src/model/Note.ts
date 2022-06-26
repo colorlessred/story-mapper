@@ -66,7 +66,7 @@ export class Note implements IPath, ICard {
     }
 
     getName(): String {
-        return `n${this.pathWithVersion}`;
+        return `N${this.pathWithVersion}`;
     }
 
     createNewNext(): void {

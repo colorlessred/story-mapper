@@ -7,13 +7,14 @@ export class NotesInSteps {
     private stepToNotes: Map<String, Map<String, Note>> = new Map();
     private maxSize = 0;
     private readonly arrayArray: Array<Array<Note>> = [];
+    private steps: Step[] = [];
 
     constructor(steps: Array<Step>, notes: Set<Note>) {
         steps.forEach((step) => {
-            this.addStep(step)
+            this.addStep(step);
         });
         notes.forEach((note) => {
-            this.addNote(note)
+            this.addNote(note);
         });
         this.arrayArray = this.computeArrayArray();
     }
@@ -21,6 +22,14 @@ export class NotesInSteps {
     /** add all the steps, even the ones for which we have no notes */
     private addStep(step: Step) {
         this.stepToNotes.set(step.getPath(), new Map());
+        this.steps.push(step);
+    }
+
+    public getStep(stepNumber: number): Step {
+        if (stepNumber < 0 || stepNumber >= this.steps.length) {
+            throw new Error(`We have ${this.steps.length} steps, but asked for step number ${stepNumber}`);
+        }
+        return this.steps[stepNumber];
     }
 
     /** add the notes, linking them to the proper steps */

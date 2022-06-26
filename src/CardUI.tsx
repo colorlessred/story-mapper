@@ -3,18 +3,28 @@ import './App.css';
 import {Card} from "./model/Card";
 import {StoryMapper} from "./model/StoryMapper";
 
-interface Props {
-    card: Card;
-    storyMapper: StoryMapper;
+interface PropsControls {
+
 }
 
-export const CardUI = ({card, storyMapper}: Props) => {
+const Controls = ({}: PropsControls) => {
+
+};
+
+
+interface PropsCardUI {
+    card: Card;
+    storyMapper: StoryMapper;
+
+}
+
+export const CardUI = ({card, storyMapper}: PropsCardUI) => {
 
     const createNewNext = () => {
         card.createNewNext();
         // building the board will trigger the page refresh
         storyMapper.buildBoard();
-    }
+    };
 
     return (
         <td className={`card card${card.getType()}`}>
@@ -27,5 +37,5 @@ export const CardUI = ({card, storyMapper}: Props) => {
                 </div>
             </div>
         </td>
-    )
-}
+    );
+};

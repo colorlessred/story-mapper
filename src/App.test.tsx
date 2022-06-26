@@ -294,7 +294,7 @@ describe("add next", () => {
             const [sm] = prep();
             it('board', () => {
                 expect(sm.buildBoard().toString())
-                    .toEqual("[[,j1,,,j2][,s1.1,s1.2,s1.3,s2.1][v1,,,,][v2,,,,]]");
+                    .toEqual("[[,J1,,,J2][,S1.1,S1.2,S1.3,S2.1][V1,,,,][V2,,,,]]");
             })
         }
     );
@@ -305,7 +305,7 @@ describe("add next", () => {
         // j2 is last so there will be a j3 created
         it('board', () => {
             expect(sm.buildBoard().toString())
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1][v1,,,,,][v2,,,,,]]");
+                .toEqual("[[,J1,,,J2,J3][,S1.1,S1.2,S1.3,S2.1,S3.1][V1,,,,,][V2,,,,,]]");
         });
     });
 
@@ -315,7 +315,7 @@ describe("add next", () => {
         // it will create one intermediate entry between j1 and j2
         it('board', () => {
             expect(sm.buildBoard().toString())
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1][v1,,,,,][v2,,,,,]]");
+                .toEqual("[[,J1,,,J2,J3][,S1.1,S1.2,S1.3,S2.1,S3.1][V1,,,,,][V2,,,,,]]");
         });
     });
 
@@ -326,7 +326,7 @@ describe("add next", () => {
         // it will create one intermediate entry between j1 and j2
         it('board', () => {
             expect(sm.buildBoard().toString())
-                .toEqual("[[,j1,,,j2,j3][,s1.1,s1.2,s1.3,s2.1,s3.1][v1,n1.1.1.1,,,,][v2,,,,,]]");
+                .toEqual("[[,J1,,,J2,J3][,S1.1,S1.2,S1.3,S2.1,S3.1][V1,N1.1.1.1,,,,][V2,,,,,]]");
         });
     });
 
@@ -335,7 +335,7 @@ describe("add next", () => {
         v1.createNewNext();
         it('board', () => {
             expect(sm.buildBoard().toString())
-                .toEqual("[[,j1,,,j2][,s1.1,s1.2,s1.3,s2.1][v1,,,,][new Version,,,,][v2,,,,]]");
+                .toEqual("[[,J1,,,J2][,S1.1,S1.2,S1.3,S2.1][V1,,,,][V2,,,,][V3,,,,]]");
         })
     });
 

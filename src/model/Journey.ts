@@ -37,7 +37,7 @@ export class Journey extends SmartArray<Step> implements ICard {
     }
 
     getName(): String {
-        return "j" + this.getPath();
+        return `J${this.getPath()}`;
     }
 
     /**
