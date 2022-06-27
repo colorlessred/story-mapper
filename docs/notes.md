@@ -4,11 +4,10 @@
 
 - UI
     - unique key in cards (ICard)
-    - delete journey, step, note, version
-    - move journey, step, note, version
+    - drop into Adder
     - serializer / deserializer
         - create minimal structure that describes the content
-    -
+    - 
 - edit
     - journey, step, note, version
     - fields

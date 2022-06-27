@@ -4,7 +4,7 @@ import {Step} from "./Step";
 /** used by Version to track the Notes in each Step */
 export class NotesInSteps {
     /** the keys are the position of the Step and the Note */
-    private stepToNotes: Map<String, Map<String, Note>> = new Map();
+    private stepToNotes: Map<string, Map<string, Note>> = new Map();
     private maxSize = 0;
     private readonly arrayArray: Array<Array<Note>> = [];
     private steps: Step[] = [];

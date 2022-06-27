@@ -4,17 +4,34 @@ import {ICard} from "./ICard";
  * like the hierarchical types (Journey, Step, Note), but also empty or button-like cards
  */
 export class Card {
-    baseElement: ICard;
+    private readonly baseElement: ICard;
+    /**
+     * unique key used by React
+     * @private
+     */
+    private key: string = "";
 
     constructor(baseElement: ICard) {
         this.baseElement = baseElement;
     }
 
-    getType(): String {
+    getBaseElement() {
+        return this.baseElement;
+    }
+
+    setKey(key: string) {
+        this.key = key;
+    }
+
+    public getKey(): string {
+        return this.key;
+    }
+
+    getType(): string {
         return CardType[this.baseElement.getType()];
     }
 
-    toString(): String {
+    toString(): string {
         return this.baseElement.getName();
     }
 
@@ -24,6 +41,26 @@ export class Card {
 
     showControls(): boolean {
         return this.baseElement.showControls();
+    }
+
+    canDelete(): boolean {
+        return this.baseElement.canDelete();
+    }
+
+    delete(): void {
+        this.baseElement.delete();
+    }
+
+    getId(): string {
+        return this.baseElement.getId();
+    }
+
+    canMoveInto(card: Card): boolean {
+        return this.baseElement.canMoveInto(card.baseElement);
+    }
+
+    moveInto(card: Card): void {
+        this.baseElement.moveInto(card.baseElement);
     }
 }
 

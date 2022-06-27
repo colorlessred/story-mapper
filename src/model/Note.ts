@@ -3,23 +3,25 @@ import {Version} from "./Version";
 import {IPath} from "./IPath";
 import {Step} from "./Step";
 import {CardType} from "./Card";
+import {EmptyAdder} from "./EmptyAdder";
 
 export class Note implements IPath, ICard {
-    private readonly name: String;
-    private readonly step: Step;
+    private name: string;
+    private step: Step;
     private version: Version;
+
     /** string that represents the whole hierarchical position, journey.step.note */
-    private path: String = "";
+    private path: string = "";
     private positionInParent: number = 0;
 
     /** track the position only inside the version step */
     private positionInVersionStep: number = 0;
 
     /** Note path done with version: journey.version.positionInVersionStep */
-    private pathWithVersion: String = "";
+    private pathWithVersion: string = "";
 
     constructor(
-        name: String,
+        name: string,
         step: Step,
         version: Version,
         pushInStep: boolean = false,
@@ -38,11 +40,62 @@ export class Note implements IPath, ICard {
         }
     }
 
-    setPath(path: String): void {
+    getId(): string {
+        return this.pathWithVersion;
+    }
+
+    canMoveInto(item: ICard): boolean {
+        return (
+            (item instanceof Note || item instanceof EmptyAdder)
+            && item !== this && this.canDelete()
+        );
+    }
+
+    moveInto(item: ICard): void {
+        if (this.canMoveInto(item)) {
+            if (item instanceof Note) {
+                this.moveIntoNote(item);
+            } else if (item instanceof EmptyAdder) {
+                this.moveIntoEmptyAdder(item);
+            }
+        }
+    }
+
+    private moveIntoEmptyAdder(emptyAdder: EmptyAdder) {
+        this.delete();
+        // add note to the step and version specified by the adder
+        this.moveToStepVersion(emptyAdder.getStep(), 1, emptyAdder.getVersion());
+    }
+
+    private moveIntoNote(note: Note) {
+        const targetNote: Note = note;
+        // detach the note from the current version & step
+        this.delete();
+
+        // attach it back into the new position
+        this.moveToStepVersion(targetNote.getStep(), targetNote.getPositionInParent() + 1, targetNote.version);
+    }
+
+    /**
+     * move into specific Step, position, and Version
+     * @param step
+     * @param positionInStep
+     * @param version
+     * @private
+     */
+    private moveToStepVersion(step: Step, positionInStep: number, version: Version) {
+        this.step = step;
+        this.step.add(this, positionInStep);
+
+        this.version = version;
+        this.version.addNote(this);
+    }
+
+    setPath(path: string): void {
         this.path = path;
     }
 
-    getPath(): String {
+    getPath(): string {
         return this.path;
     }
 
@@ -57,7 +110,7 @@ export class Note implements IPath, ICard {
         return this.path + "(" + this.name + ")";
     }
 
-    toStringVersion(): String {
+    toStringVersion(): string {
         return this.pathWithVersion + "(" + this.name + ")";
     }
 
@@ -65,8 +118,8 @@ export class Note implements IPath, ICard {
         return this.step;
     }
 
-    getName(): String {
-        return `N${this.pathWithVersion}`;
+    getName(): string {
+        return this.name;
     }
 
     createNewNext(): void {
@@ -88,5 +141,16 @@ export class Note implements IPath, ICard {
 
     showControls(): boolean {
         return true;
+    }
+
+    canDelete(): boolean {
+        return true;
+    }
+
+    delete(): void {
+        if (this.canDelete()) {
+            this.version.deleteNote(this);
+            this.step.deleteItem(this);
+        }
     }
 }

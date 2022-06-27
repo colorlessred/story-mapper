@@ -15,6 +15,17 @@ import {ICard} from "./ICard";
 export class StoryMapper {
     private allJourneys: AllJourneys = new AllJourneys();
     private allVersions: AllVersions = new AllVersions();
+
+    private draggedCard?: Card;
+
+    public setDraggedCard(card: Card) {
+        this.draggedCard = card;
+    }
+
+    public getDraggedCard(): Card | undefined {
+        return this.draggedCard;
+    }
+
     private boardRefreshHook: (board: Board) => void = (board: Board) => {
     };
 
@@ -22,25 +33,15 @@ export class StoryMapper {
         return new Journey(this.allJourneys, new Step());
     }
 
-    addVersion(name: String): Version {
+    addVersion(name: string): Version {
         return new Version(name, this.allJourneys, this.allVersions);
-    }
-
-    deleteJourney(journey: Journey): void {
-        // TODO
-        throw new Error("not implemented");
-    }
-
-    deleteVersion(version: Version): void {
-        // TODO
-        throw new Error("not implemented");
     }
 
     addStep(journey: Journey): Step {
         return new Step(journey);
     }
 
-    addNote(name: String, step: Step, version: Version): Note {
+    addNote(name: string, step: Step, version: Version): Note {
         return new Note(name, step, version, true, true);
     }
 
@@ -61,9 +62,7 @@ export class StoryMapper {
         const stepCards: Card[] = [];
         this.allJourneys.getItems().forEach((journey, rowIndex) => {
             const itemsNum = journey.getItems().length;
-            // we need to add the cards even if the journey has no steps
-            const maxCols = Math.max(itemsNum, 1);
-            for (let colIndex = 0; colIndex < maxCols; colIndex++) {
+            for (let colIndex = 0; colIndex < itemsNum; colIndex++) {
                 if (colIndex === 0) {
                     board.addCard(new Card(journey));
                 } else {
@@ -91,12 +90,14 @@ export class StoryMapper {
             const cols = notesInSteps.getStepsSize();
             const arrayArrayNotes = notesInSteps.getArrayArray();
             for (let row = 0; row < rows; row++) {
-                if (row === 0) {
-                    board.addCard(new Card(version));
-                } else {
-                    board.addCard(new Card(new EmptyContent()));
-                }
                 for (let col = 0; col < cols; col++) {
+                    if (col === 0) {
+                        if (row === 0) {
+                            board.addCard(new Card(version));
+                        } else {
+                            board.addCard(new Card(new EmptyContent()));
+                        }
+                    }
                     const arrayNotes: Note[] = arrayArrayNotes[col];
                     if (row < arrayNotes.length) {
                         const note: Note = arrayNotes[row];

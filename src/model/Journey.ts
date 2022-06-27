@@ -36,7 +36,11 @@ export class Journey extends SmartArray<Step> implements ICard {
         return this.getItems()[0];
     }
 
-    getName(): String {
+    getName(): string {
+        return `J${this.getPath()}`;
+    }
+
+    getId(): string {
         return `J${this.getPath()}`;
     }
 
@@ -56,4 +60,35 @@ export class Journey extends SmartArray<Step> implements ICard {
         return true;
     }
 
+    /**
+     * journey can be deleted if it has just one empty step
+     */
+    canDelete(): boolean {
+        return (this.size() === 1) && (this.getFirstStep().isEmpty());
+    }
+
+    delete(): void {
+        if (this.canDelete()) {
+            this.deleteItem(this.getFirstStep());
+        }
+    }
+
+    /**
+     * cannot delete if it's the only Step
+     * @param item
+     */
+    canDeleteItem(item: Step): boolean {
+        return this.has(item) && this.size() > 1;
+    }
+
+    canMoveInto(card: ICard): boolean {
+        return card instanceof Journey;
+    }
+
+    moveInto(card: ICard): void {
+        if (this.canMoveInto(card) && card instanceof Journey) {
+            const journey: Journey = card;
+            this.allJourneys.move(this, journey.getPositionInParent() + 1);
+        }
+    }
 }

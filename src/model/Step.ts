@@ -19,11 +19,16 @@ export class Step extends SmartArray<Note> implements ICard {
         }
     }
 
+    getId(): string {
+        return `S${this.getPath()}`;
+    }
+
     setJourney(journey: Journey) {
         this.journey = journey;
     }
 
-    getName(): String {
+    getName(): string {
+        // return `S${this.getPath()} (${this.size()})`;
         return `S${this.getPath()}`;
     }
 
@@ -40,5 +45,44 @@ export class Step extends SmartArray<Note> implements ICard {
 
     showControls(): boolean {
         return true;
+    }
+
+    private canDeleteFromJourney(): boolean {
+        return (this.journey !== undefined) ? this.journey.canDeleteItem(this) : true;
+    }
+
+    /**
+     * Step can be deleted if it's empty and if its Journey thinks it can be deleted
+     */
+    canDelete(): boolean {
+        return this.isEmpty() && this.canDeleteFromJourney();
+    }
+
+    delete(): void {
+        if (this.canDelete()) {
+            if (this.journey !== undefined) {
+                this.journey.deleteItem(this);
+            }
+        }
+    }
+
+    canMoveInto(card: ICard): boolean {
+        return (card instanceof Step) && this.canDeleteFromJourney();
+    }
+
+    moveInto(card: ICard): void {
+        if (this.canMoveInto(card)) {
+            if (card instanceof Step) {
+                const step: Step = card;
+                // detach from journey
+                if (this.journey !== undefined) {
+                    this.journey.deleteItem(this);
+                }
+                if (step.journey !== undefined) {
+                    this.journey = step.journey;
+                    step.journey.add(this, step.getPositionInParent() + 1);
+                }
+            }
+        }
     }
 }

@@ -13,15 +13,15 @@ import {CardType} from "./Card";
  * So we need to recompute it all every time we need to use the notesInStep object
  */
 export class Version implements IPath, ICard {
-    private readonly name: String;
+    private readonly name: string;
     private notes: Set<Note> = new Set<Note>();
-    private path: String = "";
+    private path: string = "";
     private positionInParent: number = 0;
     private readonly allJourneys: AllJourneys;
     private notesInStep: NotesInSteps;
     private readonly allVersions?: AllVersions;
 
-    constructor(name: String, allJourneys: AllJourneys, allVersions?: AllVersions, position?: number) {
+    constructor(name: string, allJourneys: AllJourneys, allVersions?: AllVersions, position?: number) {
         this.name = name;
         this.allJourneys = allJourneys;
 
@@ -37,25 +37,32 @@ export class Version implements IPath, ICard {
         this.notesInStep = this.rebuildInternalStructure();
     }
 
-    setPath(path: String): void {
+    setPath(path: string): void {
         this.path = path;
     }
 
-    getPath(): String {
+    getPath(): string {
         return this.path;
     }
 
     addNote(note: Note) {
+        if (this.notes.has(note)) {
+            throw new Error("cannot add, the Note is already in the Version");
+        }
         this.notes.add(note);
         this.rebuildInternalStructure();
     }
 
-    toString(): String {
+    getId(): string {
+        return `V${this.getPath()}`;
+    }
+
+    toString(): string {
         return this.path + '(' + this.name + ')';
     }
 
     /** string representation of Notes in all the Steps */
-    toStringNotesInStep(): String {
+    toStringNotesInStep(): string {
         this.rebuildInternalStructure();
         if (this.notesInStep) {
             return this.notesInStep.getArrayArray().toString();
@@ -70,14 +77,14 @@ export class Version implements IPath, ICard {
     }
 
     /** build string representation that uses the position in the version step */
-    toStringNotesWithVersionNumber(): String {
+    toStringNotesWithVersionNumber(): string {
         this.rebuildInternalStructure();
-        const out: String[] = [];
+        const out: string[] = [];
         if (this.notesInStep) {
             out.push('[');
             this.notesInStep.getArrayArray().forEach((array) => {
                 out.push('[');
-                const notes: String[] = [];
+                const notes: string[] = [];
                 array.forEach((note) => {
                     notes.push(note.toStringVersion());
                 });
@@ -104,7 +111,7 @@ export class Version implements IPath, ICard {
         return this.notesInStep;
     }
 
-    getName(): String {
+    getName(): string {
         return `V${this.getPath()}`;
     }
 
@@ -130,5 +137,38 @@ export class Version implements IPath, ICard {
 
     showControls(): boolean {
         return true;
+    }
+
+    canDelete(): boolean {
+        return this.notes.size === 0;
+    }
+
+    delete(): void {
+        if (this.canDelete() && this.allVersions !== undefined) {
+            this.allVersions.deleteItem(this);
+        }
+    }
+
+    deleteNote(note: Note) {
+        if (this.notes.has(note)) {
+            this.notes.delete(note);
+            this.rebuildInternalStructure();
+        }
+    }
+
+    canMoveInto(card: ICard): boolean {
+        return card instanceof Version;
+    }
+
+    moveInto(card: ICard): void {
+        if (this.canMoveInto(card)
+            && card instanceof Version
+            && this.allVersions !== undefined) {
+            const version: Version = card;
+            // must be in the same "board" to make sense
+            if (this.allVersions === version.allVersions) {
+                this.allVersions.move(this, version.getPositionInParent() + 1);
+            }
+        }
     }
 }

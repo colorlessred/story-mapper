@@ -1,4 +1,5 @@
 import {Card} from "./Card";
+import {Utils} from "./Utils";
 
 /** the global board from which we will build the UI */
 export class Board {
@@ -13,6 +14,10 @@ export class Board {
             this.startNewLine = false;
             this.currentArray = [];
         }
+        // compute key from row and column
+        const row = this.cards.length;
+        const col = this.currentArray.length;
+        card.setKey(`${row}.${col}`);
         this.currentArray.push(card);
     }
 
@@ -22,7 +27,7 @@ export class Board {
             const columns = this.cards[0].length;
             if (this.currentArray.length != columns) {
                 throw new Error(`The first row had ${columns} columns, but the ` +
-                    `current row (index ${this.cards.length}) has ${this.currentArray.length}`)
+                    `current row (index ${this.cards.length}) has ${this.currentArray.length}`);
             }
         }
         this.cards.push(this.currentArray);
@@ -30,19 +35,22 @@ export class Board {
     }
 
     toString(): string {
-        const out: String[] = [];
+        const out: string[] = [];
         out.push('[');
         this.cards.forEach((arrayCard) => {
-            out.push('[');
-            out.push(arrayCard.map((card) => card.toString()).join(','));
-            out.push(']');
+            out.push('[' + arrayCard.map((card) => card.getId()).join(',') + ']');
         });
         out.push(']');
 
         return out.join('');
     }
 
-    getCards() {
-        return this.cards;
+    getCards(): Array<Array<Card>> {
+        return [...this.cards];
+    }
+
+    getCard(row: number, column: number): Card {
+        const cardsRow: Card[] = Utils.getFromArray(this.cards, row);
+        return Utils.getFromArray(cardsRow, column);
     }
 }

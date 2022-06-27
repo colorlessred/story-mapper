@@ -13,7 +13,22 @@ export class EmptyAdder implements ICard {
         this.step = step;
     }
 
-    getName(): String {
+    getStep(): Step {
+        return this.step
+    }
+
+    getVersion(): Version {
+        return this.version;
+    }
+
+    getId(): string {
+        return [CardType[this.getType()],
+            this.version.getPositionInParent(),
+            this.step.getPositionInParent()
+        ].join('.');
+    }
+
+    getName(): string {
         return "";
     }
 
@@ -22,14 +37,26 @@ export class EmptyAdder implements ICard {
     }
 
     getType(): CardType {
-        return CardType.Empty;
+        return CardType.Adder;
     }
 
     showControls(): boolean {
         return true;
     }
 
-    getKey(): String {
-        return "";
+    canDelete(): boolean {
+        return false;
     }
+
+    delete(): void {
+    }
+
+    canMoveInto(card: ICard): boolean {
+        return false;
+    }
+
+    moveInto(card: ICard): void {
+        throw new Error("not yet implemented");
+    }
+
 }

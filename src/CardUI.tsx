@@ -16,8 +16,18 @@ const Controls = ({card, storyMapper}: PropsControls) => {
             storyMapper.buildBoard();
         };
 
+        const deleteCard = () => {
+            card.delete();
+            storyMapper.buildBoard();
+        };
+
+        const deleteButton = (card.canDelete()) ? <button onClick={deleteCard}>-</button> : <></>;
+
         return (
-            <button onClick={createNewNext}>+</button>
+            <>
+                <button onClick={createNewNext}>+</button>
+                {deleteButton}
+            </>
         );
     } else {
         return (<></>);
@@ -30,11 +40,41 @@ interface PropsCardUI {
 }
 
 export const CardUI = ({card, storyMapper}: PropsCardUI) => {
+    const dragStartHandler = (event: React.DragEvent) => {
+        storyMapper.setDraggedCard(card);
+        console.log(`started drag for ${card.getId()}`);
+    };
+
+    const dragOverHandler = (event: React.DragEvent) => {
+        const draggedCard = storyMapper.getDraggedCard();
+        if (draggedCard !== undefined) {
+            if (draggedCard.canMoveInto(card)) {
+                event.preventDefault();
+                // console.log(`card ${event.dataTransfer.getData('card')} drag over ${card.getId()}`);
+            }
+        }
+    };
+
+    const dropHandler = (event: React.DragEvent) => {
+        const draggedCard = storyMapper.getDraggedCard();
+        if (draggedCard !== undefined) {
+            if (draggedCard.canMoveInto(card)) {
+                draggedCard.moveInto(card);
+                storyMapper.buildBoard();
+            }
+        }
+    };
+
     return (
-        <td className={`card card${card.getType()}`}>
+        <td className={`card card${card.getType()}`}
+            draggable={true}
+            onDragStart={dragStartHandler}
+            onDragOver={dragOverHandler}
+            onDrop={dropHandler}
+        >
             <div className="content">
                 <div className="cardContent">
-                    {card.toString()}
+                    {card.getId()}
                 </div>
                 <div className="controls">
                     <Controls card={card} storyMapper={storyMapper}/>

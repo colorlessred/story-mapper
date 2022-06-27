@@ -1,7 +1,7 @@
 export interface IPath {
-    setPath(path: String): void;
+    setPath(path: string): void;
 
-    getPath(): String;
+    getPath(): string;
 
     /** zero-based */
     setPositionInParent(position: number): void;
