@@ -10,9 +10,15 @@ import {Step} from "./Step";
 import {EmptyAdder} from "./EmptyAdder";
 import {NotesInSteps} from "./NotesInSteps";
 import {ICard} from "./ICard";
+import {ISerialized} from "./serialize/ISerialized";
+import {ISerializable} from "./serialize/ISerializable";
+import {Serializer} from "./serialize/Serializer";
 
 /** class the represents the full model */
-export class StoryMapper {
+export class StoryMapper
+    // implements ISerializable
+{
+
     private allJourneys: AllJourneys = new AllJourneys();
     private allVersions: AllVersions = new AllVersions();
 
@@ -123,4 +129,8 @@ export class StoryMapper {
 
         return board;
     }
+
+    // toSerialized(serializer: Serializer): void {
+    //     throw new Error("Method not implemented.");
+    // }
 }
