@@ -1,16 +1,15 @@
-import {StoryMapper} from "./model/StoryMapper";
-import {SmartArray} from "./model/SmartArray";
-import {Version} from "./model/Version";
-import {AllVersions} from "./model/AllVersions";
-import {NotesInSteps} from "./model/NotesInSteps";
-import {AllJourneys} from "./model/AllJourneys";
-import {Note} from "./model/Note";
-import {Journey} from "./model/Journey";
-import {Step} from "./model/Step";
-import exp from "constants";
-import {Board} from "./model/Board";
-import {Card} from "./model/Card";
-import {EmptyAdder} from "./model/EmptyAdder";
+import {StoryMapper} from "../model/StoryMapper";
+import {SmartArray} from "../model/SmartArray";
+import {Version} from "../model/Version";
+import {AllVersions} from "../model/AllVersions";
+import {NotesInSteps} from "../model/NotesInSteps";
+import {AllJourneys} from "../model/AllJourneys";
+import {Note} from "../model/Note";
+import {Journey} from "../model/Journey";
+import {Step} from "../model/Step";
+import {Board} from "../model/Board";
+import {Card} from "../model/Card";
+import {EmptyAdder} from "../model/EmptyAdder";
 
 describe("Smart Array", () => {
     const aj = new AllJourneys();

@@ -1,5 +1,4 @@
 import {Serializer} from "./Serializer";
-import {ISerialized} from "./ISerialized";
 
 /**
  * build a serializable object that contains just the minimal needed data and no
@@ -7,5 +6,5 @@ import {ISerialized} from "./ISerialized";
  * - T: the serialized type
  */
 export interface ISerializable {
-    toSerialized(serializer: Serializer): ISerialized;
+    toSerialized(serializer: Serializer): object;
 }
