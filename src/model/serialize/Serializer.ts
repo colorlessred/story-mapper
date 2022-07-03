@@ -11,21 +11,20 @@ export class Serializer {
      * @private
      */
     private readonly objectToId: Map<any, number> = new Map<any, number>();
-    private readonly root: Object;
+
+    // private readonly root: Object;
 
     constructor(object: ISerializable) {
-        this.root = object.toSerialized(this);
+        this.getObject(object);
     }
 
     /**
      * return a JSON representation of the serialized objects
      */
     public getJson(): string {
-        return JSON.stringify(
-            {
-                root: this.root,
-                references: this.references
-            });
+        const json = JSON.stringify(this.references);
+        console.log(json);
+        return json;
     }
 
     /**

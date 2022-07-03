@@ -4,8 +4,7 @@
 
 - UI
     - unique key in cards (ICard)
-    - serializer / deserializer
-        - create minimal structure that describes the content
+    - deserializer
 - edit
     - journey, step, note, version
     - fields

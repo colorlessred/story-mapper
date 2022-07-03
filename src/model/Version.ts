@@ -6,6 +6,9 @@ import {Note} from "./Note";
 import {IPath} from "./IPath";
 import {Step} from "./Step";
 import {CardType} from "./Card";
+import {Serializer} from "./serialize/Serializer";
+import {ISerialized} from "./serialize/ISerialized";
+import {Deserializer} from "./serialize/Deserializer";
 
 /**
  * not a good design. The internal structure depends on the data on all journeys and versions.
@@ -170,5 +173,25 @@ export class Version implements IPath, ICard {
                 this.allVersions.move(this, version.getPositionInParent() + 1);
             }
         }
+    }
+
+    toSerialized(serializer: Serializer): ISerialized {
+        return {
+            type: 'Version',
+            value: {
+                name: this.name,
+                notes: Array.from(this.notes.values()).map((note: Note) => {
+                    return serializer.getObject(note);
+                }),
+                path: this.path,
+                positionInParent: this.positionInParent,
+                allJourneys: serializer.getObject(this.allJourneys),
+                allVersions: serializer.getObject(this.allVersions)
+            }
+        };
+    }
+
+    toObject(deserializer: Deserializer): object {
+        throw new Error("not yet implemented");
     }
 }

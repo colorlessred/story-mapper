@@ -4,9 +4,12 @@ import {IPath} from "./IPath";
 import {Step} from "./Step";
 import {CardType} from "./Card";
 import {EmptyAdder} from "./EmptyAdder";
+import {Serializer} from "./serialize/Serializer";
+import {Deserializer} from "./serialize/Deserializer";
+import {ISerialized} from "./serialize/ISerialized";
 
 export class Note implements IPath, ICard {
-    private name: string;
+    private readonly name: string;
     private step: Step;
     private version: Version;
 
@@ -153,4 +156,24 @@ export class Note implements IPath, ICard {
             this.step.deleteItem(this);
         }
     }
+
+    toSerialized(serializer: Serializer): ISerialized {
+        return {
+            type: 'Note',
+            value: {
+                name: this.name,
+                step: serializer.getObject(this.step),
+                version: serializer.getObject(this.version),
+                path: this.path,
+                positionInParent: this.positionInParent,
+                positionInVersionStep: this.positionInVersionStep,
+                pathWithVersion: this.pathWithVersion
+            }
+        };
+    }
+
+    toObject(deserializer: Deserializer): object {
+        throw new Error("not yet implemented");
+    }
+
 }
