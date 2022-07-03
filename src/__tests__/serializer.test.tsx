@@ -156,7 +156,6 @@ describe("deserialize", () => {
         );
 
         deserializer.addDeserializer('TestClass', dFunTestClass);
-        const a: TestClass | undefined = deserializer.deserialize<TestClassSerialized, TestClass>();
 
         const checkAndReturnParent = (obj: TestClass | undefined, name: string): TestClass | undefined => {
             if (obj === undefined) {
@@ -166,6 +165,7 @@ describe("deserialize", () => {
             return obj.parent;
         };
 
+        const a: TestClass | undefined = deserializer.deserialize<TestClassSerialized, TestClass>();
         const c = checkAndReturnParent(a, "a");
         const b = checkAndReturnParent(c, "c");
         const aNew = checkAndReturnParent(b, "b");
