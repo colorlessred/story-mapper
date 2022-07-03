@@ -35,10 +35,6 @@ describe('serializer', () => {
                     }
                 };
             }
-
-            // toObject(deserializer: Deserializer): object {
-            //     return {};
-            // }
         }
 
         const a = new TestClass("abc", true, 1234);
@@ -77,16 +73,6 @@ describe('serializer', () => {
                     }
                 };
             }
-
-            // toObject(deserializer: Deserializer): ISerializable<TestClassSerializable> {
-            //     return {
-            //         type: "null",
-            //         value: {
-            //             name: "",
-            //             parent: 0
-            //         }
-            //     };
-            // }
         }
 
         const a = new TestClass("a");
@@ -140,6 +126,10 @@ describe("deserialize", () => {
                 this.parent = parent;
             }
 
+            setParent(parent: TestClass | undefined) {
+                this.parent = parent;
+            }
+
             toSerialized(serializer: Serializer): ISerialized<TestClassSerialized> {
                 return {
                     type: 'TestClass',
@@ -153,15 +143,32 @@ describe("deserialize", () => {
 
         const json = '[{"type":"TestClass","value":{"name":"a","parent":1}},{"type":"TestClass","value":{"name":"c","parent":2}},{"type":"TestClass","value":{"name":"b","parent":0}}]';
         const deserializer = new Deserializer(json);
-        const dFunTestClass: DeserializerFunction<TestClassSerialized, TestClass> =
-            (values: TestClassSerialized, deserializer: Deserializer) => {
-                console.log(`building instance for ${values.name}`);
+        const dFunTestClass = new DeserializerFunction<TestClassSerialized, TestClass>(
+            (values: TestClassSerialized) => {
                 return new TestClass(
-                    values.name,
-                    deserializer.deserializeItem<TestClassSerialized, TestClass>(values.parent)
+                    values.name
                 );
-            };
+            },
+            (object: TestClass, values: TestClassSerialized, deserializer: Deserializer) => {
+                const parent = deserializer.deserializeItem<TestClassSerialized, TestClass>(values.parent);
+                object.setParent(parent);
+            }
+        );
+
         deserializer.addDeserializer('TestClass', dFunTestClass);
-        deserializer.deserialize();
+        const a: TestClass | undefined = deserializer.deserialize<TestClassSerialized, TestClass>();
+
+        const checkAndReturnParent = (obj: TestClass | undefined, name: string): TestClass | undefined => {
+            if (obj === undefined) {
+                throw new Error(`${name} should not be undefined`);
+            }
+            expect(obj.name).toEqual(name);
+            return obj.parent;
+        };
+
+        const c = checkAndReturnParent(a, "a");
+        const b = checkAndReturnParent(c, "c");
+        const aNew = checkAndReturnParent(b, "b");
+        expect(aNew).toBe(a);
     });
 });
