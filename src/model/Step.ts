@@ -3,8 +3,16 @@ import {Note} from "./Note";
 import {ICard} from "./ICard";
 import {Journey} from "./Journey";
 import {CardType} from "./Card";
+import {ISerializable} from "./serialize/ISerializable";
+import {Serializer} from "./serialize/Serializer";
+import {ISerialized} from "./serialize/ISerialized";
 
-export class Step extends SmartArray<Note> implements ICard {
+export interface StepSerialized {
+    journey: number | undefined;
+    items: (number | undefined)[];
+}
+
+export class Step extends SmartArray<Note> implements ICard, ISerializable<StepSerialized> {
     private journey?: Journey;
 
     constructor(journey?: Journey, position?: number) {
@@ -17,6 +25,18 @@ export class Step extends SmartArray<Note> implements ICard {
                 journey.push(this);
             }
         }
+    }
+
+    toSerialized(serializer: Serializer): ISerialized<StepSerialized> {
+        return {
+            type: 'Step',
+            value: {
+                journey: serializer.getObject(this.journey),
+                items: this.getItems().map((note: Note) => {
+                    serializer.getObject(note);
+                })
+            }
+        };
     }
 
     getId(): string {

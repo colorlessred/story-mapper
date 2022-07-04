@@ -1,5 +1,4 @@
 import {Serializer} from "./Serializer";
-import {Deserializer} from "./Deserializer";
 import {ISerialized} from "./ISerialized";
 
 /**
@@ -9,6 +8,4 @@ import {ISerialized} from "./ISerialized";
  */
 export interface ISerializable<T> {
     toSerialized(serializer: Serializer): ISerialized<T>;
-
-    // toObject(deserializer: Deserializer): ISerializable<T>;
 }

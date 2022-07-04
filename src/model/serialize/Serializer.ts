@@ -12,9 +12,7 @@ export class Serializer {
      */
     private readonly objectToId: Map<any, number> = new Map<any, number>();
 
-    // private readonly root: Object;
-
-    constructor(object: ISerializable) {
+    constructor(object: ISerializable<any>) {
         this.getObject(object);
     }
 
@@ -32,7 +30,7 @@ export class Serializer {
      * it will serialize it, store it, and return the id;
      * @param object
      */
-    public getObject(object?: ISerializable): number | undefined {
+    public getObject(object?: ISerializable<any>): number | undefined {
         if (object === undefined) {
             return undefined;
         }
@@ -53,10 +51,10 @@ export class Serializer {
         return id;
     }
 
-    public getObjectFromReference(id: number): any {
-        if (id < 0 || id >= this.references.length) {
-            throw new Error(`wrong id (${id}). Must be between 0 and ${this.references.length - 1} inclusive`);
-        }
-        return this.references[id];
-    }
+    // public getObjectFromReference(id: number): any {
+    //     if (id < 0 || id >= this.references.length) {
+    //         throw new Error(`wrong id (${id}). Must be between 0 and ${this.references.length - 1} inclusive`);
+    //     }
+    //     return this.references[id];
+    // }
 }

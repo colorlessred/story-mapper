@@ -5,10 +5,20 @@ import {Step} from "./Step";
 import {CardType} from "./Card";
 import {EmptyAdder} from "./EmptyAdder";
 import {Serializer} from "./serialize/Serializer";
-import {Deserializer} from "./serialize/Deserializer";
 import {ISerialized} from "./serialize/ISerialized";
+import {ISerializable} from "./serialize/ISerializable";
 
-export class Note implements IPath, ICard {
+export interface NoteSerialized {
+    name: string,
+    step: number | undefined,
+    version: number | undefined,
+    path: string,
+    positionInParent: number,
+    positionInVersionStep: number,
+    pathWithVersion: string
+}
+
+export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     private readonly name: string;
     private step: Step;
     private version: Version;
@@ -157,7 +167,7 @@ export class Note implements IPath, ICard {
         }
     }
 
-    toSerialized(serializer: Serializer): ISerialized {
+    toSerialized(serializer: Serializer): ISerialized<NoteSerialized> {
         return {
             type: 'Note',
             value: {
@@ -171,9 +181,4 @@ export class Note implements IPath, ICard {
             }
         };
     }
-
-    toObject(deserializer: Deserializer): object {
-        throw new Error("not yet implemented");
-    }
-
 }

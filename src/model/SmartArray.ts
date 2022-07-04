@@ -1,7 +1,12 @@
 import {IPath} from "./IPath";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
-import {Deserializer} from "./serialize/Deserializer";
+
+export interface SmartArraySerialized {
+    // NB: doesn't need to serialize the path and the positionInParent
+    // as these will be recomputed when building structure
+    items: (number | undefined)[];
+}
 
 /**
  * Node in the journey-step-note tree
@@ -24,21 +29,15 @@ export class SmartArray<T extends IPath> implements IPath {
     private path: string = "";
     private positionInParent: number = 0;
 
-    toSerialized(serializer: Serializer): ISerialized {
+    toSerialized(serializer: Serializer): ISerialized<SmartArraySerialized> {
         return {
             type: 'SmartArray',
             value: {
-                path: this.path,
-                positionInParent: this.positionInParent,
                 items: this.items.map((item: T) => {
                     return serializer.getObject(item);
                 })
             }
         };
-    }
-
-    toObject(deserializer: Deserializer): object {
-        throw new Error("not yet implemented");
     }
 
     public isEmpty(): boolean {

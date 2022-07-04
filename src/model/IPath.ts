@@ -1,6 +1,9 @@
 import {ISerializable} from "./serialize/ISerializable";
 
-export interface IPath extends ISerializable{
+export interface IPathSerialized {
+}
+
+export interface IPath extends ISerializable<IPathSerialized> {
     setPath(path: string): void;
 
     getPath(): string;
