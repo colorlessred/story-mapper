@@ -3,9 +3,6 @@ import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
 
 export interface SmartArraySerialized {
-    // NB: doesn't need to serialize the path and the positionInParent
-    // as these will be recomputed when building structure
-    items: (number | undefined)[];
 }
 
 /**
@@ -30,14 +27,7 @@ export class SmartArray<T extends IPath> implements IPath {
     private positionInParent: number = 0;
 
     toSerialized(serializer: Serializer): ISerialized<SmartArraySerialized> {
-        return {
-            type: 'SmartArray',
-            value: {
-                items: this.items.map((item: T) => {
-                    return serializer.getObject(item);
-                })
-            }
-        };
+        throw new Error("SmartArray should never be serialized directly");
     }
 
     public isEmpty(): boolean {

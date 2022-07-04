@@ -3,8 +3,16 @@ import {ICard} from "./ICard";
 import {AllJourneys} from "./AllJourneys";
 import {Step} from "./Step";
 import {CardType} from "./Card";
+import {ISerializable} from "./serialize/ISerializable";
+import {Serializer} from "./serialize/Serializer";
+import {ISerialized} from "./serialize/ISerialized";
 
-export class Journey extends SmartArray<Step> implements ICard {
+export interface JourneySerialized {
+    allJourneys?: number;
+    steps: (number | undefined)[];
+}
+
+export class Journey extends SmartArray<Step> implements ICard, ISerializable<JourneySerialized> {
     allJourneys: AllJourneys;
 
     /**
@@ -24,6 +32,16 @@ export class Journey extends SmartArray<Step> implements ICard {
         } else {
             this.allJourneys.push(this);
         }
+    }
+
+    toSerialized(serializer: Serializer): ISerialized<JourneySerialized> {
+        return {
+            type: 'Journey',
+            value: {
+                allJourneys: serializer.getObject(this.allJourneys),
+                steps: this.getItems().map(step => serializer.getObject(step))
+            }
+        };
     }
 
     /**
@@ -87,8 +105,7 @@ export class Journey extends SmartArray<Step> implements ICard {
 
     moveInto(card: ICard): void {
         if (this.canMoveInto(card) && card instanceof Journey) {
-            const journey: Journey = card;
-            this.allJourneys.move(this, journey.getPositionInParent() + 1);
+            this.allJourneys.move(this, card.getPositionInParent() + 1);
         }
     }
 }

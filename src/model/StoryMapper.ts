@@ -13,10 +13,14 @@ import {ICard} from "./ICard";
 import {ISerializable} from "./serialize/ISerializable";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
-import {Deserializer} from "./serialize/Deserializer";
+
+export interface StoryMapperSerialized {
+    allJourneys?: number,
+    allVersions?: number
+}
 
 /** class the represents the full model */
-export class StoryMapper implements ISerializable {
+export class StoryMapper implements ISerializable<StoryMapperSerialized> {
 
     private allJourneys: AllJourneys = new AllJourneys();
     private allVersions: AllVersions = new AllVersions();
@@ -129,7 +133,7 @@ export class StoryMapper implements ISerializable {
         return board;
     }
 
-    toSerialized(serializer: Serializer): ISerialized {
+    toSerialized(serializer: Serializer): ISerialized<StoryMapperSerialized> {
         return {
             type: 'StoryMapper',
             value: {
@@ -137,9 +141,5 @@ export class StoryMapper implements ISerializable {
                 allVersions: serializer.getObject(this.allVersions)
             }
         };
-    }
-
-    toObject(deserializer: Deserializer): object {
-        throw new Error("not yet implemented");
     }
 }

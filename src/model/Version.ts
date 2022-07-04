@@ -8,14 +8,21 @@ import {Step} from "./Step";
 import {CardType} from "./Card";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
-import {Deserializer} from "./serialize/Deserializer";
+import {ISerializable} from "./serialize/ISerializable";
+
+export interface VersionSerialized {
+    name: string,
+    notes: (number | undefined)[],
+    allJourneys?: number,
+    allVersions?: number;
+}
 
 /**
  * not a good design. The internal structure depends on the data on all journeys and versions.
  * These can change (e.g. when adding a new Journey), without the Version realising.
  * So we need to recompute it all every time we need to use the notesInStep object
  */
-export class Version implements IPath, ICard {
+export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
     private readonly name: string;
     private notes: Set<Note> = new Set<Note>();
     private path: string = "";
@@ -175,23 +182,15 @@ export class Version implements IPath, ICard {
         }
     }
 
-    toSerialized(serializer: Serializer): ISerialized {
+    toSerialized(serializer: Serializer): ISerialized<VersionSerialized> {
         return {
             type: 'Version',
             value: {
                 name: this.name,
-                notes: Array.from(this.notes.values()).map((note: Note) => {
-                    return serializer.getObject(note);
-                }),
-                path: this.path,
-                positionInParent: this.positionInParent,
+                notes: Array.from(this.notes.values()).map(note => serializer.getObject(note)),
                 allJourneys: serializer.getObject(this.allJourneys),
                 allVersions: serializer.getObject(this.allVersions)
             }
         };
-    }
-
-    toObject(deserializer: Deserializer): object {
-        throw new Error("not yet implemented");
     }
 }

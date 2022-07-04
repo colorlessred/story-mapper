@@ -11,11 +11,7 @@ import {ISerializable} from "./serialize/ISerializable";
 export interface NoteSerialized {
     name: string,
     step: number | undefined,
-    version: number | undefined,
-    path: string,
-    positionInParent: number,
-    positionInVersionStep: number,
-    pathWithVersion: string
+    version: number | undefined
 }
 
 export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
@@ -173,11 +169,7 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
             value: {
                 name: this.name,
                 step: serializer.getObject(this.step),
-                version: serializer.getObject(this.version),
-                path: this.path,
-                positionInParent: this.positionInParent,
-                positionInVersionStep: this.positionInVersionStep,
-                pathWithVersion: this.pathWithVersion
+                version: serializer.getObject(this.version)
             }
         };
     }
