@@ -8,6 +8,7 @@ import {ISerialized} from "../model/serialize/ISerialized";
 import {AllVersions} from "../model/AllVersions";
 import {Version} from "../model/Version";
 import {AllJourneys} from "../model/AllJourneys";
+import {Journey} from "../model/Journey";
 
 describe('serializer', () => {
     it('class with primitives', () => {
@@ -201,7 +202,8 @@ describe("deserialize", () => {
         deserializer.addDeserializer(AllVersions.serializedTypeName(), AllVersions.deserializerFunction);
         deserializer.addDeserializer(Version.serializedTypeName(), Version.deserializerFunction);
         deserializer.addDeserializer(AllJourneys.serializedTypeName(), AllJourneys.deserializerFunction);
+        deserializer.addDeserializer(Journey.serializedTypeName(), Journey.deserializerFunction);
 
-        // const sm2 = deserializer.deserialize<StoryMapperSerialized, StoryMapper>();
+        const sm2 = deserializer.deserialize<StoryMapperSerialized, StoryMapper>();
     });
 });
