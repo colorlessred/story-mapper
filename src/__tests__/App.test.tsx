@@ -139,7 +139,7 @@ describe("tree, no version", () => {
         const aj = new AllJourneys();
         const v = new Version("version 1", aj);
         const s = new Step();
-        const j = new Journey(aj, s);
+        const j = Journey.createAndPush(aj, s);
 
         const n = new Note("a", s, v, true);
 
@@ -161,7 +161,7 @@ describe("tree, no version", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
             const s = new Step();
-            const j = new Journey(aj, s);
+            const j = Journey.createAndPush(aj, s);
             new Note("a", s, v, true);
             expect(aj.toString()).toEqual("[[[1.1.1(a)]]]");
         });
@@ -171,9 +171,9 @@ describe("tree, no version", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
             const s = new Step();
-            const j = new Journey(aj, s);
+            const j = Journey.createAndPush(aj, s);
             new Note("a", s, v, true);
-            const j2 = new Journey(aj, new Step());
+            const j2 = Journey.createAndPush(aj, new Step());
 
             expect(aj.toString()).toEqual("[[[1.1.1(a)]],[[]]]");
         });
@@ -182,9 +182,9 @@ describe("tree, no version", () => {
             const aj = new AllJourneys();
             const v = new Version("version 1", aj);
             const s = new Step();
-            const j = new Journey(aj, s);
+            const j = Journey.createAndPush(aj, s);
             new Note("a", s, v, true);
-            const j2 = new Journey(aj, new Step());
+            const j2 = Journey.createAndPush(aj, new Step());
 
             aj.move(j2, 1);
             expect(aj.toString()).toEqual("[[[]],[[2.1.1(a)]]]");
@@ -196,7 +196,7 @@ describe("tree, no version", () => {
 describe("NotesInStep", () => {
     const aj = new AllJourneys();
     const s1 = new Step();
-    const j = new Journey(aj, s1);
+    const j = Journey.createAndPush(aj, s1);
     const v = new Version("a", aj);
     new Step(j); // step2
     const s3 = new Step(j);
@@ -227,7 +227,7 @@ describe("NotesInStep", () => {
 describe("version logic", () => {
     const aj = new AllJourneys();
     const s1 = new Step();
-    const j = new Journey(aj, s1);
+    const j = Journey.createAndPush(aj, s1);
     const s2 = new Step(j);
     const s3 = new Step(j);
 

@@ -9,40 +9,32 @@ import {ISerialized} from "./serialize/ISerialized";
 
 export interface JourneySerialized {
     allJourneys?: number;
-    steps: (number | undefined)[];
+    steps: number [];
 }
 
 export class Journey extends SmartArray<Step> implements ICard, ISerializable<JourneySerialized> {
     allJourneys: AllJourneys;
 
+    static createAndPush(allJourneys:AllJourneys, step:Step):Journey{
+        const journey = new Journey(allJourneys, step);
+        allJourneys.push(journey);
+        return journey;
+    }
+
     /**
      * a journey should always have a step, so we take it as input in the
      * constructor. position is 1-based
-     * @param allJourneys
-     * @param step
-     * @param position
      */
-    constructor(allJourneys: AllJourneys, step: Step, position?: number) {
+    constructor(allJourneys: AllJourneys, step: Step) {
         super();
         this.push(step);
         step.setJourney(this);
         this.allJourneys = allJourneys;
-        if (position !== undefined) {
-            this.allJourneys.add(this, position);
-        } else {
-            this.allJourneys.push(this);
-        }
     }
 
-    toSerialized(serializer: Serializer): ISerialized<JourneySerialized> {
-        return {
-            type: 'Journey',
-            value: {
-                allJourneys: serializer.getObject(this.allJourneys),
-                steps: this.getItems().map(step => serializer.getObject(step))
-            }
-        };
-    }
+    // setAllJourneys(allJourneys: AllJourneys) {
+    //     this.allJourneys = allJourneys;
+    // }
 
     /**
      * Handy method to return first step, since it's often created implicitly
@@ -67,7 +59,8 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
      */
     createNewNext(): void {
         // position in parent is zero-based, while adding we use 1-based, so it needs "+2"
-        new Journey(this.allJourneys, new Step(), this.getPositionInParent() + 2);
+        const journey = new Journey(this.allJourneys, new Step());
+        this.allJourneys.add(journey, this.getPositionInParent() + 2);
     }
 
     getType(): CardType {
@@ -107,5 +100,15 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
         if (this.canMoveInto(card) && card instanceof Journey) {
             this.allJourneys.move(this, card.getPositionInParent() + 1);
         }
+    }
+
+    toSerialized(serializer: Serializer): ISerialized<JourneySerialized> {
+        return {
+            type: 'Journey',
+            value: {
+                allJourneys: serializer.getObject(this.allJourneys),
+                steps: this.getItems().map(step => serializer.getObject(step))
+            }
+        };
     }
 }

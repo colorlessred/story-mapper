@@ -70,10 +70,10 @@ export class Deserializer {
      * by looking up the type of deserializer we need
      * @param id
      */
-    public deserializeItem<T, S extends ISerializable<T>>(id: number | undefined): S | undefined {
-        if (id === undefined) {
-            return undefined;
-        }
+    public deserializeItem<T, S extends ISerializable<T>>(id: number): S {
+        // if (id === undefined) {
+        //     return undefined;
+        // }
         let dItem: any | undefined = this.dItems.get(id);
 
         if (dItem === undefined) {
@@ -101,7 +101,7 @@ export class Deserializer {
     /**
      * deserialize, starting from the first element of the array as root
      */
-    deserialize<T, S extends ISerializable<T>>(): S | undefined {
+    deserialize<T, S extends ISerializable<T>>(): S {
         // deserialize the first element, which is always the root
         // this will trigger the deserialization of all the needed dependencies
         return this.deserializeItem<T, S>(0);

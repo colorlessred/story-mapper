@@ -1,11 +1,12 @@
 import {SmartArray} from "./SmartArray";
-import {Journey} from "./Journey";
+import {Journey, JourneySerialized} from "./Journey";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
 import {ISerializable} from "./serialize/ISerializable";
+import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
 
 export interface AllJourneysSerialized {
-    journeys: (number | undefined)[];
+    journeys: number [];
 }
 
 /** root object that contains all the journeys */
@@ -24,10 +25,22 @@ export class AllJourneys extends SmartArray<Journey> implements ISerializable<Al
 
     toSerialized(serializer: Serializer): ISerialized<AllJourneysSerialized> {
         return {
-            type: 'AllJourneys',
+            type: AllJourneys.serializedTypeName(),
             value: {
                 journeys: this.getItems().map(journey => serializer.getObject(journey))
             }
         };
     }
+
+    public static serializedTypeName = () => 'AllJourneys';
+
+    public static deserializerFunction = new DeserializerFunction<AllJourneysSerialized, AllJourneys>(
+        (values: AllJourneysSerialized) => new AllJourneys(),
+        (object: AllJourneys, values: AllJourneysSerialized, deserializer: Deserializer) => {
+            values.journeys.forEach(journeyId => {
+                const journey = deserializer.deserializeItem<JourneySerialized, Journey>(journeyId);
+                object.push(journey);
+            });
+        }
+    );
 }

@@ -9,7 +9,7 @@ import {ISerialized} from "./serialize/ISerialized";
 
 export interface StepSerialized {
     journey: number | undefined;
-    notes: (number | undefined)[];
+    items: (number | undefined)[];
 }
 
 export class Step extends SmartArray<Note> implements ICard, ISerializable<StepSerialized> {
@@ -32,7 +32,7 @@ export class Step extends SmartArray<Note> implements ICard, ISerializable<StepS
             type: 'Step',
             value: {
                 journey: serializer.getObject(this.journey),
-                notes: this.getItems().map(note => serializer.getObject(note))
+                items: this.getItems().map(note => serializer.getObject(note))
             }
         };
     }

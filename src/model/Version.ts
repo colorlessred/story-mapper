@@ -1,14 +1,15 @@
 import {ICard} from "./ICard";
-import {AllVersions} from "./AllVersions";
+import {AllVersions, AllVersionsSerialized} from "./AllVersions";
 import {NotesInSteps} from "./NotesInSteps";
-import {AllJourneys} from "./AllJourneys";
-import {Note} from "./Note";
+import {AllJourneys, AllJourneysSerialized} from "./AllJourneys";
+import {Note, NoteSerialized} from "./Note";
 import {IPath} from "./IPath";
 import {Step} from "./Step";
 import {CardType} from "./Card";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
 import {ISerializable} from "./serialize/ISerializable";
+import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
 
 export interface VersionSerialized {
     name: string,
@@ -27,11 +28,11 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
     private notes: Set<Note> = new Set<Note>();
     private path: string = "";
     private positionInParent: number = 0;
-    private readonly allJourneys: AllJourneys;
+    private allJourneys?: AllJourneys;
     private notesInStep: NotesInSteps;
-    private readonly allVersions?: AllVersions;
+    private allVersions?: AllVersions;
 
-    constructor(name: string, allJourneys: AllJourneys, allVersions?: AllVersions, position?: number) {
+    constructor(name: string, allJourneys?: AllJourneys, allVersions?: AllVersions, position?: number) {
         this.name = name;
         this.allJourneys = allJourneys;
 
@@ -45,6 +46,16 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
         }
 
         this.notesInStep = this.rebuildInternalStructure();
+    }
+
+    setAllJourneys(allJourneys: AllJourneys) {
+        this.allJourneys = allJourneys;
+        this.rebuildInternalStructure();
+    }
+
+    setAllVersions(allVersions: AllVersions) {
+        this.allVersions = allVersions;
+        this.rebuildInternalStructure();
     }
 
     setPath(path: string): void {
@@ -111,11 +122,13 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
         // get all the steps starting from the top allJourneys object, which
         // needs to be the root of all the journeys
         const allSteps: Step[] = [];
-        this.allJourneys.getItems().forEach((journey) => {
-            journey.getItems().forEach((step) => {
-                allSteps.push(step);
+        if (this.allJourneys !== undefined) {
+            this.allJourneys.getItems().forEach((journey) => {
+                journey.getItems().forEach((step) => {
+                    allSteps.push(step);
+                });
             });
-        });
+        }
         this.notesInStep = new NotesInSteps(allSteps, this.notes);
         // return it so that it can be used in the constructor to avoid the "undefined" type
         return this.notesInStep;
@@ -184,7 +197,7 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
 
     toSerialized(serializer: Serializer): ISerialized<VersionSerialized> {
         return {
-            type: 'Version',
+            type: Version.serializedTypeName(),
             value: {
                 name: this.name,
                 notes: Array.from(this.notes.values()).map(note => serializer.getObject(note)),
@@ -193,4 +206,25 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
             }
         };
     }
+
+    public static serializedTypeName = () => 'Version';
+
+    public static deserializerFunction = new DeserializerFunction<VersionSerialized, Version>(
+        (values: VersionSerialized) => {
+            return new Version(values.name);
+        },
+        (object: Version, values: VersionSerialized, deserializer: Deserializer) => {
+            if (values.allJourneys !== undefined) {
+                object.setAllJourneys(deserializer.deserializeItem<AllJourneysSerialized, AllJourneys>(values.allJourneys));
+            }
+            if (values.allVersions !== undefined) {
+                object.setAllVersions(deserializer.deserializeItem<AllVersionsSerialized, AllVersions>(values.allVersions));
+            }
+            values.notes.forEach(note => {
+                if (note !== undefined) {
+                    object.addNote(deserializer.deserializeItem<NoteSerialized, Note>(note));
+                }
+            });
+        }
+    );
 }

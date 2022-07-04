@@ -30,10 +30,7 @@ export class Serializer {
      * it will serialize it, store it, and return the id;
      * @param object
      */
-    public getObject(object?: ISerializable<any>): number | undefined {
-        if (object === undefined) {
-            return undefined;
-        }
+    public getObject(object?: ISerializable<any>): number {
         let id = this.objectToId.get(object);
         if (id === undefined) {
             // to be able to map even circular dependencies, first store the
@@ -43,18 +40,13 @@ export class Serializer {
             this.references.push(undefined);
 
             // push the serialized object into the references
-            this.references[newId] = object.toSerialized(this);
+            if (object !== undefined) {
+                this.references[newId] = object.toSerialized(this);
+            }
             this.objectToId.set(object, newId);
 
             id = newId;
         }
         return id;
     }
-
-    // public getObjectFromReference(id: number): any {
-    //     if (id < 0 || id >= this.references.length) {
-    //         throw new Error(`wrong id (${id}). Must be between 0 and ${this.references.length - 1} inclusive`);
-    //     }
-    //     return this.references[id];
-    // }
 }

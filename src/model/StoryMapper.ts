@@ -2,8 +2,8 @@ import {EmptyContent} from "./EmptyContent";
 import {Card} from "./Card";
 import {Board} from "./Board";
 import {Version} from "./Version";
-import {AllVersions} from "./AllVersions";
-import {AllJourneys} from "./AllJourneys";
+import {AllVersions, AllVersionsSerialized} from "./AllVersions";
+import {AllJourneys, AllJourneysSerialized} from "./AllJourneys";
 import {Note} from "./Note";
 import {Journey} from "./Journey";
 import {Step} from "./Step";
@@ -13,6 +13,7 @@ import {ICard} from "./ICard";
 import {ISerializable} from "./serialize/ISerializable";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
+import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
 
 export interface StoryMapperSerialized {
     allJourneys?: number,
@@ -27,6 +28,9 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
 
     private draggedCard?: Card;
 
+    constructor() {
+    }
+
     public setDraggedCard(card: Card) {
         this.draggedCard = card;
     }
@@ -39,7 +43,7 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
     };
 
     newJourney(): Journey {
-        return new Journey(this.allJourneys, new Step());
+        return Journey.createAndPush(this.allJourneys, new Step());
     }
 
     addVersion(name: string): Version {
@@ -135,11 +139,26 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
 
     toSerialized(serializer: Serializer): ISerialized<StoryMapperSerialized> {
         return {
-            type: 'StoryMapper',
+            type: StoryMapper.serializedTypeName(),
             value: {
                 allJourneys: serializer.getObject(this.allJourneys),
                 allVersions: serializer.getObject(this.allVersions)
             }
         };
     }
+
+    public static serializedTypeName = () => 'StoryMapper';
+
+    public static deserializerFunction = new DeserializerFunction<StoryMapperSerialized, StoryMapper>(
+        (values: StoryMapperSerialized) => new StoryMapper()
+        ,
+        (object: StoryMapper, values: StoryMapperSerialized, deserializer: Deserializer) => {
+            if (values.allVersions !== undefined) {
+                object.allVersions = deserializer.deserializeItem<AllVersionsSerialized, AllVersions>(values.allVersions);
+            }
+            if (values.allJourneys !== undefined) {
+                object.allJourneys = deserializer.deserializeItem<AllJourneysSerialized, AllJourneys>(values.allJourneys);
+            }
+        }
+    );
 }
