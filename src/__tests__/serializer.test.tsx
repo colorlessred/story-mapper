@@ -97,20 +97,20 @@ describe('serializer', () => {
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
         const s1_1 = j1.getFirstStep();
-        new Step(j1);
-        new Step(j1);
+        Step.createAndPush(j1);
+        Step.createAndPush(j1);
         const s2_1 = j2.getFirstStep();
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
-        new Note("a", s1_1, v1, true, true);
-        new Note("b", s1_1, v1, true, true);
-        new Note("c", s2_1, v2, true, true);
+        Note.create("a", s1_1, v1, true, true);
+        Note.create("b", s1_1, v1, true, true);
+        Note.create("c", s2_1, v2, true, true);
 
         const serializer = new Serializer(sm);
         const json = serializer.getJson();
         // console.log(json);
         expect(json).toEqual(
-            '[{"type":"StoryMapper","value":{"allJourneys":1,"allVersions":7}},{"type":"AllJourneys","value":{"journeys":[2,11]}},{"type":"Journey","value":{"allJourneys":1,"steps":[3,12,13]}},{"type":"Step","value":{"journey":2,"items":[4,6]}},{"type":"Note","value":{"name":"a","step":3,"version":5}},{"type":"Version","value":{"name":"v1","notes":[4,6],"allJourneys":1,"allVersions":7}},{"type":"Note","value":{"name":"b","step":3,"version":5}},{"type":"AllVersions","value":{"versions":[5,8]}},{"type":"Version","value":{"name":"v2","notes":[9],"allJourneys":1,"allVersions":7}},{"type":"Note","value":{"name":"c","step":10,"version":8}},{"type":"Step","value":{"journey":11,"items":[9]}},{"type":"Journey","value":{"allJourneys":1,"steps":[10]}},{"type":"Step","value":{"journey":2,"items":[]}},{"type":"Step","value":{"journey":2,"items":[]}}]');
+            '[{"type":"StoryMapper","value":{"allJourneys":1,"allVersions":7}},{"type":"AllJourneys","value":{"journeys":[2,11]}},{"type":"Journey","value":{"allJourneys":1,"steps":[3,12,13]}},{"type":"Step","value":{"journey":2,"notes":[4,6]}},{"type":"Note","value":{"name":"a","step":3,"version":5}},{"type":"Version","value":{"name":"v1","notes":[4,6],"allJourneys":1,"allVersions":7}},{"type":"Note","value":{"name":"b","step":3,"version":5}},{"type":"AllVersions","value":{"versions":[5,8]}},{"type":"Version","value":{"name":"v2","notes":[9],"allJourneys":1,"allVersions":7}},{"type":"Note","value":{"name":"c","step":10,"version":8}},{"type":"Step","value":{"journey":11,"notes":[9]}},{"type":"Journey","value":{"allJourneys":1,"steps":[10]}},{"type":"Step","value":{"journey":2,"notes":[]}},{"type":"Step","value":{"journey":2,"notes":[]}}]');
     });
 });
 
@@ -184,25 +184,28 @@ describe("deserialize", () => {
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
         const s1_1 = j1.getFirstStep();
-        new Step(j1);
-        new Step(j1);
+        Step.createAndPush(j1);
+        Step.createAndPush(j1);
         const s2_1 = j2.getFirstStep();
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
-        new Note("a", s1_1, v1, true, true);
-        new Note("b", s1_1, v1, true, true);
-        new Note("c", s2_1, v2, true, true);
+        Note.create("a", s1_1, v1, true, true);
+        Note.create("b", s1_1, v1, true, true);
+        Note.create("c", s2_1, v2, true, true);
 
         const serializer = new Serializer(sm);
         const json = serializer.getJson();
 
         // deserialize
         const deserializer = new Deserializer(json);
+        // TODO: better way to add these? "static interface"?
         deserializer.addDeserializer(StoryMapper.serializedTypeName(), StoryMapper.deserializerFunction);
         deserializer.addDeserializer(AllVersions.serializedTypeName(), AllVersions.deserializerFunction);
         deserializer.addDeserializer(Version.serializedTypeName(), Version.deserializerFunction);
         deserializer.addDeserializer(AllJourneys.serializedTypeName(), AllJourneys.deserializerFunction);
         deserializer.addDeserializer(Journey.serializedTypeName(), Journey.deserializerFunction);
+        deserializer.addDeserializer(Step.serializedTypeName(), Step.deserializerFunction);
+        deserializer.addDeserializer(Note.serializedTypeName(), Note.deserializerFunction);
 
         const sm2 = deserializer.deserialize<StoryMapperSerialized, StoryMapper>();
     });

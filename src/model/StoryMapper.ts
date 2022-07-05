@@ -51,11 +51,11 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
     }
 
     addStep(journey: Journey): Step {
-        return new Step(journey);
+        return Step.createAndPush(journey);
     }
 
     addNote(name: string, step: Step, version: Version): Note {
-        return new Note(name, step, version, true, true);
+        return Note.create(name, step, version, true, true);
     }
 
     /**

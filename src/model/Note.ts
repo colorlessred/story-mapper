@@ -7,17 +7,18 @@ import {EmptyAdder} from "./EmptyAdder";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
 import {ISerializable} from "./serialize/ISerializable";
+import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
 
 export interface NoteSerialized {
     name: string,
-    step: number | undefined,
-    version: number | undefined
+    step: number,
+    version: number
 }
 
 export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     private readonly name: string;
-    private step: Step;
-    private version: Version;
+    private step?: Step;
+    private version?: Version;
 
     /** string that represents the whole hierarchical position, journey.step.note */
     private path: string = "";
@@ -29,24 +30,54 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     /** Note path done with version: journey.version.positionInVersionStep */
     private pathWithVersion: string = "";
 
-    constructor(
-        name: string,
-        step: Step,
-        version: Version,
-        pushInStep: boolean = false,
-        addToVersion: boolean = false) {
-
-        this.name = name;
-        this.step = step;
-        this.version = version;
-
+    public static create(name: string,
+                         step: Step,
+                         version: Version,
+                         pushInStep: boolean = false,
+                         addToVersion: boolean = false): Note {
+        const note = new Note(name);
+        note.setStep(step);
+        note.setVersion(version);
         if (pushInStep) {
-            step.push(this);
+            step.push(note);
         }
 
         if (addToVersion) {
-            version.addNote(this);
+            version.addNote(note);
         }
+        return note;
+    }
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    // constructor(
+    //     name: string,
+    //     step: Step,
+    //     version: Version,
+    //     pushInStep: boolean = false,
+    //     addToVersion: boolean = false) {
+    //
+    //     this.name = name;
+    //     this.step = step;
+    //     this.version = version;
+    //
+    //     if (pushInStep) {
+    //         step.push(this);
+    //     }
+    //
+    //     if (addToVersion) {
+    //         version.addNote(this);
+    //     }
+    // }
+
+    setStep(step: Step) {
+        this.step = step;
+    }
+
+    setVersion(version: Version) {
+        this.version = version;
     }
 
     getId(): string {
@@ -78,11 +109,16 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
 
     private moveIntoNote(note: Note) {
         const targetNote: Note = note;
-        // detach the note from the current version & step
-        this.delete();
 
-        // attach it back into the new position
-        this.moveToStepVersion(targetNote.getStep(), targetNote.getPositionInParent() + 1, targetNote.version);
+        if (targetNote.version) {
+            // detach the note from the current version & step
+            this.delete();
+
+            // attach it back into the new position
+            this.moveToStepVersion(targetNote.getStep(), targetNote.getPositionInParent() + 1, targetNote.version);
+        } else {
+            throw new Error("target note doesn't have a version");
+        }
     }
 
     /**
@@ -111,8 +147,12 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     setPositionInVersionStep(position: number): void {
         this.positionInVersionStep = position;
         // name should be: journey.step.version.noteIn
-        this.pathWithVersion =
-            [this.getStep().getPath(), this.version.getPath(), this.positionInVersionStep].join('.');
+        if (this.version) {
+            this.pathWithVersion =
+                [this.getStep().getPath(), this.version.getPath(), this.positionInVersionStep].join('.');
+        } else {
+            throw new Error("Note doesn't have a version");
+        }
     }
 
     toString(): string {
@@ -124,7 +164,11 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     }
 
     getStep(): Step {
-        return this.step;
+        if (this.step) {
+            return this.step;
+        } else {
+            throw new Error("Note doesn't have a step");
+        }
     }
 
     getName(): string {
@@ -132,8 +176,12 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     }
 
     createNewNext(): void {
-        const newNote = new Note("new note", this.step, this.version, false, true);
-        this.step.add(newNote, this.getPositionInParent() + 2);
+        if (this.step && this.version) {
+            const newNote = Note.create("new note", this.step, this.version, false, true);
+            this.step.add(newNote, this.getPositionInParent() + 2);
+        } else {
+            throw new Error("Note doesn't have step and/or version");
+        }
     }
 
     getPositionInParent(): number {
@@ -157,15 +205,19 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     }
 
     delete(): void {
-        if (this.canDelete()) {
-            this.version.deleteNote(this);
-            this.step.deleteItem(this);
+        if (this.version && this.step) {
+            if (this.canDelete()) {
+                this.version.deleteNote(this);
+                this.step.deleteItem(this);
+            }
+        } else {
+            throw new Error("Note doesn't have version and/or step");
         }
     }
 
     toSerialized(serializer: Serializer): ISerialized<NoteSerialized> {
         return {
-            type: 'Note',
+            type: Note.serializedTypeName(),
             value: {
                 name: this.name,
                 step: serializer.getObject(this.step),
@@ -173,4 +225,15 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
             }
         };
     }
+
+    public static serializedTypeName = () => 'Note';
+
+    public static deserializerFunction = new DeserializerFunction<NoteSerialized, Note>(
+        (values: NoteSerialized) => {
+            return new Note(values.name);
+        },
+        (object: Note, values: NoteSerialized, deserializer: Deserializer) => {
+
+        }
+    );
 }

@@ -33,7 +33,7 @@ export class EmptyAdder implements ICard {
     }
 
     createNewNext(): void {
-        new Note("new note", this.step, this.version, true, true);
+        Note.create("new note", this.step, this.version, true, true);
     }
 
     getType(): CardType {

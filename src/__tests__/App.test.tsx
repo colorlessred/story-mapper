@@ -141,13 +141,13 @@ describe("tree, no version", () => {
         const s = new Step();
         const j = Journey.createAndPush(aj, s);
 
-        const n = new Note("a", s, v, true);
+        const n = Note.create("a", s, v, true);
 
         it('result', () => {
             expect(aj.toString()).toEqual("[[[1.1.1(a)]]]");
         });
         it('add second', () => {
-            s.push(new Note("b", s, v));
+            s.push(Note.create("b", s, v));
             expect(aj.toString()).toEqual("[[[1.1.1(a),1.1.2(b)]]]");
         });
         it('remove first', () => {
@@ -162,7 +162,7 @@ describe("tree, no version", () => {
             const v = new Version("version 1", aj);
             const s = new Step();
             const j = Journey.createAndPush(aj, s);
-            new Note("a", s, v, true);
+            Note.create("a", s, v, true);
             expect(aj.toString()).toEqual("[[[1.1.1(a)]]]");
         });
 
@@ -172,7 +172,7 @@ describe("tree, no version", () => {
             const v = new Version("version 1", aj);
             const s = new Step();
             const j = Journey.createAndPush(aj, s);
-            new Note("a", s, v, true);
+            Note.create("a", s, v, true);
             const j2 = Journey.createAndPush(aj, new Step());
 
             expect(aj.toString()).toEqual("[[[1.1.1(a)]],[[]]]");
@@ -183,7 +183,7 @@ describe("tree, no version", () => {
             const v = new Version("version 1", aj);
             const s = new Step();
             const j = Journey.createAndPush(aj, s);
-            new Note("a", s, v, true);
+            Note.create("a", s, v, true);
             const j2 = Journey.createAndPush(aj, new Step());
 
             aj.move(j2, 1);
@@ -198,14 +198,14 @@ describe("NotesInStep", () => {
     const s1 = new Step();
     const j = Journey.createAndPush(aj, s1);
     const v = new Version("a", aj);
-    new Step(j); // step2
-    const s3 = new Step(j);
+    Step.createAndPush(j); // step2
+    const s3 = Step.createAndPush(j);
 
     const notes: Set<Note> = new Set<Note>([
-        new Note("a", s1, v, true),
-        new Note("b", s1, v, true),
-        new Note("c", s3, v, true),
-        new Note("d", s1, v, true)
+        Note.create("a", s1, v, true),
+        Note.create("b", s1, v, true),
+        Note.create("c", s3, v, true),
+        Note.create("d", s1, v, true)
     ]);
 
     const nis = new NotesInSteps(j.getItems(), notes);
@@ -228,20 +228,20 @@ describe("version logic", () => {
     const aj = new AllJourneys();
     const s1 = new Step();
     const j = Journey.createAndPush(aj, s1);
-    const s2 = new Step(j);
-    const s3 = new Step(j);
+    const s2 = Step.createAndPush(j);
+    const s3 = Step.createAndPush(j);
 
     const av = new AllVersions();
     const v1 = new Version("a", aj, av);
     const v2 = new Version("b", aj, av);
 
-    new Note("a", s1, v1, true, true);
-    new Note("b", s1, v1, true, true);
-    new Note("c", s1, v1, true, true);
-    new Note("d", s1, v2, true, true);
-    new Note("e", s2, v2, true, true);
-    new Note("f", s3, v1, true, true);
-    new Note("g", s3, v2, true, true);
+    Note.create("a", s1, v1, true, true);
+    Note.create("b", s1, v1, true, true);
+    Note.create("c", s1, v1, true, true);
+    Note.create("d", s1, v2, true, true);
+    Note.create("e", s2, v2, true, true);
+    Note.create("f", s3, v1, true, true);
+    Note.create("g", s3, v2, true, true);
 
     it('notes in string v1', () => {
         expect(v1.toStringNotesInStep()).toEqual("1.1.1(a),1.1.2(b),1.1.3(c),,1.3.1(f)");
@@ -270,8 +270,8 @@ describe("story mapper", () => {
     const j1 = sm.newJourney();
     const j2 = sm.newJourney();
     const s1_1 = j1.getFirstStep();
-    const s1_2 = new Step(j1);
-    const s1_3 = new Step(j1);
+    const s1_2 = Step.createAndPush(j1);
+    const s1_3 = Step.createAndPush(j1);
     const s2_1 = j2.getFirstStep();
 
     const v1 = sm.addVersion("v1");
@@ -283,13 +283,13 @@ describe("story mapper", () => {
      * v2         g         d
      *                      e
      */
-    new Note("a", s1_1, v1, true, true);
-    new Note("b", s1_2, v1, true, true);
-    new Note("c", s1_2, v1, true, true);
-    new Note("d", s2_1, v2, true, true);
-    new Note("e", s2_1, v2, true, true);
-    new Note("f", s1_3, v1, true, true);
-    new Note("g", s1_2, v2, true, true);
+    Note.create("a", s1_1, v1, true, true);
+    Note.create("b", s1_2, v1, true, true);
+    Note.create("c", s1_2, v1, true, true);
+    Note.create("d", s2_1, v2, true, true);
+    Note.create("e", s2_1, v2, true, true);
+    Note.create("f", s1_3, v1, true, true);
+    Note.create("g", s1_2, v2, true, true);
 
     let hookCalled = false;
 
@@ -315,8 +315,8 @@ describe("add next", () => {
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
         const s1_1 = j1.getFirstStep();
-        const s1_2 = new Step(j1);
-        const s1_3 = new Step(j1);
+        const s1_2 = Step.createAndPush(j1);
+        const s1_3 = Step.createAndPush(j1);
         const s2_1 = j2.getFirstStep();
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
@@ -364,7 +364,7 @@ describe("add next", () => {
 
     describe("create next journey, with notes", () => {
         const [sm, j1, j2, s1_1, s1_2, v1, v2] = prep();
-        new Note("n", s1_1, v1, true, true);
+        Note.create("n", s1_1, v1, true, true);
         j1.createNewNext();
         // it will create one intermediate entry between j1 and j2
         it('board', () => {
@@ -396,12 +396,12 @@ describe("delete", () => {
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
         const s1_1 = j1.getFirstStep();
-        const s1_2 = new Step(j1);
-        const s1_3 = new Step(j1);
+        const s1_2 = Step.createAndPush(j1);
+        const s1_3 = Step.createAndPush(j1);
         const s2_1 = j2.getFirstStep();
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
-        const n = new Note("a", s1_1, v1, true, true);
+        const n = Note.create("a", s1_1, v1, true, true);
         return [sm, j1, j2, v1, v2];
     }
 
@@ -493,14 +493,14 @@ describe("move", () => {
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
         const s1_1 = j1.getFirstStep();
-        const s1_2 = new Step(j1);
-        const s1_3 = new Step(j1);
+        const s1_2 = Step.createAndPush(j1);
+        const s1_3 = Step.createAndPush(j1);
         const s2_1 = j2.getFirstStep();
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
-        new Note("a", s1_1, v1, true, true);
-        new Note("b", s1_1, v1, true, true);
-        new Note("c", s2_1, v2, true, true);
+        Note.create("a", s1_1, v1, true, true);
+        Note.create("b", s1_1, v1, true, true);
+        Note.create("c", s2_1, v2, true, true);
         return [sm, j1, j2, v1, v2];
     }
 
