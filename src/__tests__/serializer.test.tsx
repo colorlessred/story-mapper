@@ -9,6 +9,7 @@ import {AllVersions} from "../model/AllVersions";
 import {Version} from "../model/Version";
 import {AllJourneys} from "../model/AllJourneys";
 import {Journey} from "../model/Journey";
+import {stringify} from "flatted";
 
 describe('serializer', () => {
     it('class with primitives', () => {
@@ -208,5 +209,11 @@ describe("deserialize", () => {
         deserializer.addDeserializer(Note.serializedTypeName(), Note.deserializerFunction);
 
         const sm2 = deserializer.deserialize<StoryMapperSerialized, StoryMapper>();
+        const serializer2 = new Serializer(sm2);
+        const json2 = serializer2.getJson();
+
+        expect(json2).toEqual(json);
+
+        expect(stringify(sm2)).toEqual(stringify(sm));
     });
 });

@@ -2,9 +2,6 @@
 
 # TODO
 
-- UI
-    - unique key in cards (ICard)
-    - deserializer
 - edit
     - journey, step, note, version
     - fields
@@ -14,5 +11,5 @@
         - images
         - dependencies
 - add story points to Notes and roll up the sums
-    - might need to have children with links to the their parents (Note -> Step -> Journey)
-- web service to save
+    - might need to have children with links to their parents (Note -> Step -> Journey)
+- build Electron app to access the filesystem

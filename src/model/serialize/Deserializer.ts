@@ -19,9 +19,18 @@ export class DeserializerFunction<T, S extends ISerializable<T>> {
      */
     withReferences: (object: S, values: T, deserializer: Deserializer) => void;
 
-    constructor(basic: (values: T) => S, withReferences: (object: S, values: T, deserializer: Deserializer) => void) {
+    /**
+     * optional function to be executed after all the references have been built
+     */
+    finalize?: (object: S) => void;
+
+    constructor(
+        basic: (values: T) => S,
+        withReferences: (object: S, values: T, deserializer: Deserializer) => void,
+        finalize?: (object: S) => void) {
         this.basic = basic;
         this.withReferences = withReferences;
+        this.finalize = finalize;
     }
 }
 
@@ -71,9 +80,6 @@ export class Deserializer {
      * @param id
      */
     public deserializeItem<T, S extends ISerializable<T>>(id: number): S {
-        // if (id === undefined) {
-        //     return undefined;
-        // }
         let dItem: any | undefined = this.dItems.get(id);
 
         if (dItem === undefined) {

@@ -171,6 +171,16 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         }
     }
 
+    /**
+     * true if the Note is ready to be used
+     */
+    isReady(): boolean {
+        // this is fairly ugly. To be deserialized the Note needs to have a constructor
+        // with only primitives. But a note without its Step and Version shouldn't really be
+        // used by other classes
+        return (this.step !== undefined && this.version !== undefined);
+    }
+
     getName(): string {
         return this.name;
     }

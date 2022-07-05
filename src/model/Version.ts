@@ -71,7 +71,9 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
             throw new Error("cannot add, the Note is already in the Version");
         }
         this.notes.add(note);
-        this.rebuildInternalStructure();
+        if (note.isReady()) {
+            this.rebuildInternalStructure();
+        }
     }
 
     getId(): string {
@@ -225,6 +227,10 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
                     object.addNote(deserializer.deserializeItem<NoteSerialized, Note>(note));
                 }
             });
+        },
+        (object: Version) => {
+            // rebuild at the end, because it might not have been done since the Notes where not ready (missing their Step)
+            object.rebuildInternalStructure();
         }
     );
 }
