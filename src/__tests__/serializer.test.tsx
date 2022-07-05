@@ -212,8 +212,12 @@ describe("deserialize", () => {
         const serializer2 = new Serializer(sm2);
         const json2 = serializer2.getJson();
 
-        expect(json2).toEqual(json);
+        // expect(json2).toEqual(json);
 
-        expect(stringify(sm2)).toEqual(stringify(sm));
+        let actual = stringify(sm2);
+        console.log(actual);
+        let expected = stringify(sm);
+        console.log(expected);
+        expect(actual).toEqual(expected);
     });
 });
