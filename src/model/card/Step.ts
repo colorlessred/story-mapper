@@ -1,12 +1,13 @@
-import {SmartArray} from "./SmartArray";
-import {Note} from "./Note";
-import {ICard} from "./ICard";
+import {SmartArray} from "../SmartArray";
+import {Note, NoteSerialized} from "./Note";
+import {ICard} from "../../ICard";
 import {Journey, JourneySerialized} from "./Journey";
-import {CardType} from "./Card";
-import {ISerializable} from "./serialize/ISerializable";
-import {Serializer} from "./serialize/Serializer";
-import {ISerialized} from "./serialize/ISerialized";
-import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
+import {CardType} from "../../Card";
+import {ISerializable} from "../serialize/ISerializable";
+import {Serializer} from "../serialize/Serializer";
+import {ISerialized} from "../serialize/ISerialized";
+import {Deserializer, DeserializerFunction} from "../serialize/Deserializer";
+import {CommonCardData} from "../CommonCardData";
 
 export interface StepSerialized {
     journey: number | undefined;
@@ -15,6 +16,11 @@ export interface StepSerialized {
 
 export class Step extends SmartArray<Note> implements ICard, ISerializable<StepSerialized> {
     private journey?: Journey;
+    private readonly _commonCardData = new CommonCardData();
+
+    get commonCardData(): CommonCardData {
+        return this._commonCardData;
+    }
 
     public static createAndPush(journey: Journey): Step {
         const step = new Step();
@@ -32,7 +38,7 @@ export class Step extends SmartArray<Note> implements ICard, ISerializable<StepS
             type: Step.serializedTypeName(),
             value: {
                 journey: serializer.getObject(this.journey),
-                notes: this.getItems().map(note => serializer.getObject(note))
+                notes: this.items.map(note => serializer.getObject(note))
             }
         };
     }
@@ -42,26 +48,28 @@ export class Step extends SmartArray<Note> implements ICard, ISerializable<StepS
     public static deserializerFunction = new DeserializerFunction<StepSerialized, Step>(
         (values: StepSerialized) => new Step(),
         (object: Step, values: StepSerialized, deserializer: Deserializer) => {
-            if (values.journey !== undefined) {
+            if (values.journey) {
                 object.setJourney(deserializer.deserializeItem<JourneySerialized, Journey>(values.journey));
             }
-            if (values.notes){
-
+            if (values.notes) {
+                values.notes.forEach((noteId) => {
+                    const note = deserializer.deserializeItem<NoteSerialized, Note>(noteId);
+                    object.push(note);
+                });
             }
         }
     );
 
-    getId(): string {
-        return `S${this.getPath()}`;
+    get id(): string {
+        return `S${this.path}`;
     }
 
     setJourney(journey: Journey) {
         this.journey = journey;
     }
 
-    getName(): string {
-        // return `S${this.getPath()} (${this.size()})`;
-        return `S${this.getPath()}`;
+    get visiblePath(): string {
+        return this.path;
     }
 
     createNewNext(): void {
@@ -70,14 +78,14 @@ export class Step extends SmartArray<Note> implements ICard, ISerializable<StepS
         }
         const step = new Step();
         step.setJourney(this.journey);
-        this.journey.add(step, this.getPositionInParent() + 2);
+        this.journey.add(step, this.positionInParent + 2);
     }
 
-    getType(): CardType {
+    get type(): CardType {
         return CardType.Step;
     }
 
-    showControls(): boolean {
+    canShowControls(): boolean {
         return true;
     }
 
@@ -114,7 +122,7 @@ export class Step extends SmartArray<Note> implements ICard, ISerializable<StepS
                 }
                 if (step.journey !== undefined) {
                     this.journey = step.journey;
-                    step.journey.add(this, step.getPositionInParent() + 1);
+                    step.journey.add(this, step.positionInParent + 1);
                 }
             }
         }

@@ -1,3 +1,7 @@
+body {
+    background-color: #fafafa;
+}
+
 .App {
     text-align: center;
 }
@@ -11,25 +15,25 @@ td.card {
     height: 100px;
     border: 1px solid #aaa;
     vertical-align: top;
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 td.cardJourney {
-    background-color: #ffe;
+    background-color: #fffffa;
 }
 
 
 td.cardStep {
-    background-color: #fee;
+    background-color: #fffafa;
 }
 
 
 td.cardNote {
-    background-color: #eff;
+    background-color: #faffff;
 }
 
 td.cardVersion {
-    background-color: #eef;
+    background-color: #fafaff;
 }
 
 td.cardEmpty {
@@ -59,3 +63,19 @@ div.controls {
 
 }
 
+div.cardPath {
+    color: #aaa;
+    text-align: left;
+    font-size: 10px;
+}
+
+div.cardTitle {
+    color: #333;
+    font-size: 12px;
+}
+
+@media print {
+    button {
+        display: none;
+    }
+}

@@ -1,23 +1,23 @@
 import {StoryMapper} from "../model/StoryMapper";
 import {SmartArray} from "../model/SmartArray";
-import {Version} from "../model/Version";
+import {Version} from "../model/card/Version";
 import {AllVersions} from "../model/AllVersions";
 import {NotesInSteps} from "../model/NotesInSteps";
 import {AllJourneys} from "../model/AllJourneys";
-import {Note} from "../model/Note";
-import {Journey} from "../model/Journey";
-import {Step} from "../model/Step";
+import {Note} from "../model/card/Note";
+import {Journey} from "../model/card/Journey";
+import {Step} from "../model/card/Step";
 import {Board} from "../model/Board";
-import {Card} from "../model/Card";
-import {EmptyAdder} from "../model/EmptyAdder";
+import {Card} from "../Card";
+import {EmptyAdder} from "../model/card/EmptyAdder";
 
 describe("Smart Array", () => {
     const aj = new AllJourneys();
 
     describe("push", () => {
         const sa = new SmartArray<Version>();
-        sa.push(new Version("a", aj));
-        sa.push(new Version("b", aj));
+        sa.push(Version.createAndPush("a", aj));
+        sa.push(Version.createAndPush("b", aj));
         it('toString', () => {
             expect(sa.toString()).toEqual("[1(a),2(b)]");
         });
@@ -25,9 +25,9 @@ describe("Smart Array", () => {
 
     describe("remove", () => {
         const sa = new SmartArray<Version>();
-        const a = new Version("a", aj);
+        const a = Version.createAndPush("a", aj);
         sa.push(a);
-        sa.push(new Version("b", aj));
+        sa.push(Version.createAndPush("b", aj));
         sa.deleteItem(a);
         it('toString', () => {
             expect(sa.toString()).toEqual("[1(b)]");
@@ -36,9 +36,9 @@ describe("Smart Array", () => {
 
     describe("item positions no deletions", () => {
         const sa = new SmartArray<Version>();
-        const a = new Version("a", aj);
+        const a = Version.createAndPush("a", aj);
         sa.push(a);
-        const b = new Version("b", aj);
+        const b = Version.createAndPush("b", aj);
         sa.push(b);
         it('toString', () => {
             expect(sa.toString()).toEqual("[1(a),2(b)]");
@@ -53,9 +53,9 @@ describe("Smart Array", () => {
 
     describe("item positions with deletions", () => {
         const sa = new SmartArray<Version>();
-        const a = new Version("a", aj);
+        const a = Version.createAndPush("a", aj);
         sa.push(a);
-        const b = new Version("b", aj);
+        const b = Version.createAndPush("b", aj);
         sa.push(b);
         sa.deleteItem(a);
         it('position second item after deletion', () => {
@@ -68,25 +68,25 @@ describe("Smart Array", () => {
 
     describe("add", () => {
         const sa = new SmartArray<Version>();
-        const a = new Version("a", aj);
+        const a = Version.createAndPush("a", aj);
         sa.push(a);
-        sa.push(new Version("b", aj));
+        sa.push(Version.createAndPush("b", aj));
 
         it('add 0', () => {
-            sa.add(new Version("c", aj), 1);
+            sa.add(Version.createAndPush("c", aj), 1);
             expect(sa.toString()).toEqual("[1(c),2(a),3(b)]");
         });
         it('add end', () => {
-            sa.add(new Version("d", aj), 10);
+            sa.add(Version.createAndPush("d", aj), 10);
             expect(sa.toString()).toEqual("[1(c),2(a),3(b),4(d)]");
         });
         it('add middle', () => {
-            sa.add(new Version("e", aj), 2);
+            sa.add(Version.createAndPush("e", aj), 2);
             expect(sa.toString()).toEqual("[1(c),2(e),3(a),4(b),5(d)]");
         });
 
         it('add invalid position', () => {
-            sa.add(new Version("f", aj), 0);
+            sa.add(Version.createAndPush("f", aj), 0);
             // unchanged result
             expect(sa.toString()).toEqual("[1(c),2(e),3(a),4(b),5(d)]");
         });
@@ -94,10 +94,10 @@ describe("Smart Array", () => {
 
     describe("move", () => {
         const sa = new SmartArray<Version>();
-        const a = new Version("a", aj);
+        const a = Version.createAndPush("a", aj);
         sa.push(a);
-        sa.push(new Version("b", aj));
-        const c = new Version("c", aj);
+        sa.push(Version.createAndPush("b", aj));
+        const c = Version.createAndPush("c", aj);
         sa.push(c);
 
         it('move middle', () => {
@@ -108,9 +108,9 @@ describe("Smart Array", () => {
 
     describe("addNext b after a in [a]", () => {
         const sa = new SmartArray<Version>();
-        const a = new Version("a", aj);
+        const a = Version.createAndPush("a", aj);
         sa.push(a);
-        sa.addNextTo(new Version("b", aj), a);
+        sa.addNextTo(Version.createAndPush("b", aj), a);
 
         it('next', () => {
             expect(sa.toString()).toEqual("[1(a),2(b)]");
@@ -120,10 +120,10 @@ describe("Smart Array", () => {
 
     describe("addNext c after a in [a,b]", () => {
         const sa = new SmartArray<Version>();
-        const a = new Version("a", aj);
+        const a = Version.createAndPush("a", aj);
         sa.push(a);
-        sa.push(new Version("b", aj));
-        sa.addNextTo(new Version("c", aj), a);
+        sa.push(Version.createAndPush("b", aj));
+        sa.addNextTo(Version.createAndPush("c", aj), a);
 
         it('next', () => {
             expect(sa.toString()).toEqual("[1(a),2(c),3(b)]");
@@ -137,7 +137,7 @@ describe("tree, no version", () => {
 
     describe("basic", () => {
         const aj = new AllJourneys();
-        const v = new Version("version 1", aj);
+        const v = Version.createAndPush("version 1", aj);
         const s = new Step();
         const j = Journey.createAndPush(aj, s);
 
@@ -159,7 +159,7 @@ describe("tree, no version", () => {
     describe("move", () => {
         it("result", () => {
             const aj = new AllJourneys();
-            const v = new Version("version 1", aj);
+            const v = Version.createAndPush("version 1", aj);
             const s = new Step();
             const j = Journey.createAndPush(aj, s);
             Note.create("a", s, v, true);
@@ -169,7 +169,7 @@ describe("tree, no version", () => {
 
         it("add second journey", () => {
             const aj = new AllJourneys();
-            const v = new Version("version 1", aj);
+            const v = Version.createAndPush("version 1", aj);
             const s = new Step();
             const j = Journey.createAndPush(aj, s);
             Note.create("a", s, v, true);
@@ -180,7 +180,7 @@ describe("tree, no version", () => {
 
         it('move second journey', () => {
             const aj = new AllJourneys();
-            const v = new Version("version 1", aj);
+            const v = Version.createAndPush("version 1", aj);
             const s = new Step();
             const j = Journey.createAndPush(aj, s);
             Note.create("a", s, v, true);
@@ -188,7 +188,7 @@ describe("tree, no version", () => {
 
             aj.move(j2, 1);
             expect(aj.toString()).toEqual("[[[]],[[2.1.1(a)]]]");
-            expect(j2.getPositionInParent()).toEqual(0);
+            expect(j2.positionInParent).toEqual(0);
         });
     });
 });
@@ -197,7 +197,7 @@ describe("NotesInStep", () => {
     const aj = new AllJourneys();
     const s1 = new Step();
     const j = Journey.createAndPush(aj, s1);
-    const v = new Version("a", aj);
+    const v = Version.createAndPush("a", aj);
     Step.createAndPush(j); // step2
     const s3 = Step.createAndPush(j);
 
@@ -208,7 +208,7 @@ describe("NotesInStep", () => {
         Note.create("d", s1, v, true)
     ]);
 
-    const nis = new NotesInSteps(j.getItems(), notes);
+    const nis = new NotesInSteps(j.items, notes);
 
     it("arrayArray", () => {
         expect(nis.getArrayArray().toString()).toEqual("1.1.1(a),1.1.2(b),1.1.3(d)" +
@@ -232,8 +232,8 @@ describe("version logic", () => {
     const s3 = Step.createAndPush(j);
 
     const av = new AllVersions();
-    const v1 = new Version("a", aj, av);
-    const v2 = new Version("b", aj, av);
+    const v1 = Version.createAndPushVersion("a", aj, av);
+    const v2 = Version.createAndPushVersion("b", aj, av);
 
     Note.create("a", s1, v1, true, true);
     Note.create("b", s1, v1, true, true);
@@ -269,10 +269,10 @@ describe("story mapper", () => {
     const sm = new StoryMapper();
     const j1 = sm.newJourney();
     const j2 = sm.newJourney();
-    const s1_1 = j1.getFirstStep();
+    const s1_1 = j1.firstStep;
     const s1_2 = Step.createAndPush(j1);
     const s1_3 = Step.createAndPush(j1);
-    const s2_1 = j2.getFirstStep();
+    const s2_1 = j2.firstStep;
 
     const v1 = sm.addVersion("v1");
     const v2 = sm.addVersion("v2");
@@ -301,11 +301,11 @@ describe("story mapper", () => {
         expect(hookCalled).toEqual(false);
         expect(sm.buildBoard().toString());
         expect(hookCalled).toEqual(true);
-        expect(j1.getPositionInParent()).toEqual(0);
-        expect(s1_1.getPositionInParent()).toEqual(0);
-        expect(s1_2.getPositionInParent()).toEqual(1);
-        expect(s1_3.getPositionInParent()).toEqual(2);
-        expect(s1_1.getPositionInParent()).toEqual(0);
+        expect(j1.positionInParent).toEqual(0);
+        expect(s1_1.positionInParent).toEqual(0);
+        expect(s1_2.positionInParent).toEqual(1);
+        expect(s1_3.positionInParent).toEqual(2);
+        expect(s1_1.positionInParent).toEqual(0);
     });
 });
 
@@ -314,10 +314,10 @@ describe("add next", () => {
         const sm = new StoryMapper();
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
-        const s1_1 = j1.getFirstStep();
+        const s1_1 = j1.firstStep;
         const s1_2 = Step.createAndPush(j1);
         const s1_3 = Step.createAndPush(j1);
-        const s2_1 = j2.getFirstStep();
+        const s2_1 = j2.firstStep;
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
         return [sm, j1, j2, s1_1, s1_2, v1, v2];
@@ -395,10 +395,10 @@ describe("delete", () => {
         const sm = new StoryMapper();
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
-        const s1_1 = j1.getFirstStep();
+        const s1_1 = j1.firstStep;
         const s1_2 = Step.createAndPush(j1);
         const s1_3 = Step.createAndPush(j1);
-        const s2_1 = j2.getFirstStep();
+        const s2_1 = j2.firstStep;
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
         const n = Note.create("a", s1_1, v1, true, true);
@@ -418,7 +418,7 @@ describe("delete", () => {
 
     it('delete note', () => {
         const [sm, j1] = prep();
-        const N1_1_1_1: Note = j1.getFirstStep().getItems()[0];
+        const N1_1_1_1: Note = j1.firstStep.items[0];
         expect(N1_1_1_1.canDelete()).toEqual(true);
         N1_1_1_1.delete();
         expect(sm.buildBoard().toString()).toEqual(
@@ -430,7 +430,7 @@ describe("delete", () => {
 
     it('delete empty step', () => {
         const [sm, j1] = prep();
-        const S1_2 = j1.getItems()[1];
+        const S1_2 = j1.items[1];
         expect(S1_2.canDelete()).toEqual(true);
         S1_2.delete();
         expect(sm.buildBoard().toString()).toEqual(
@@ -443,7 +443,7 @@ describe("delete", () => {
     it('delete non-empty step', () => {
         const [sm, j1] = prep();
         expect(sm.buildBoard().toString()).toEqual(DEFAULT_SM);
-        const S1_1 = j1.getItems()[0];
+        const S1_1 = j1.items[0];
         expect(S1_1.canDelete()).toEqual(false);
         S1_1.delete();
         expect(sm.buildBoard().toString()).toEqual(DEFAULT_SM);
@@ -492,10 +492,10 @@ describe("move", () => {
         const sm = new StoryMapper();
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
-        const s1_1 = j1.getFirstStep();
+        const s1_1 = j1.firstStep;
         const s1_2 = Step.createAndPush(j1);
         const s1_3 = Step.createAndPush(j1);
-        const s2_1 = j2.getFirstStep();
+        const s2_1 = j2.firstStep;
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
         Note.create("a", s1_1, v1, true, true);
@@ -518,31 +518,31 @@ describe("move", () => {
 
     it('move note, same steps', () => {
         const [sm, j1] = prep();
-        const [n1, n2] = j1.getFirstStep().getItems();
+        const [n1, n2] = j1.firstStep.items;
         expect(n1.canMoveInto(n2)).toEqual(true);
         expect(sm.buildBoard().toString()).toEqual(DEFAULT_SM);
-        expect(n1.getPositionInParent()).toEqual(0);
-        expect(n2.getPositionInParent()).toEqual(1);
+        expect(n1.positionInParent).toEqual(0);
+        expect(n2.positionInParent).toEqual(1);
         n2.moveInto(n1);
         // check they reversed position
-        expect(n1.getPositionInParent()).toEqual(1);
-        expect(n2.getPositionInParent()).toEqual(0);
+        expect(n1.positionInParent).toEqual(1);
+        expect(n2.positionInParent).toEqual(0);
         // the resulting paths are the same because they have been regenerated
         expect(sm.buildBoard().toString()).toEqual(DEFAULT_SM);
         // check they swapped
-        const [n2after, n1after] = j1.getFirstStep().getItems();
+        const [n2after, n1after] = j1.firstStep.items;
         expect(n1).toEqual(n1after);
         expect(n2).toEqual(n2after);
     });
 
     it('move note, different step and version', () => {
         const [sm, j1, j2] = prep();
-        const [n1, n2] = j1.getFirstStep().getItems();
-        const [n3] = j2.getFirstStep().getItems();
+        const [n1, n2] = j1.firstStep.items;
+        const [n3] = j2.firstStep.items;
         expect(sm.buildBoard().toString()).toEqual(DEFAULT_SM);
         expect(n3.canMoveInto(n1)).toEqual(true);
-        expect(n1.getPositionInParent()).toEqual(0);
-        expect(n3.getPositionInParent()).toEqual(0);
+        expect(n1.positionInParent).toEqual(0);
+        expect(n3.positionInParent).toEqual(0);
 
         n1.moveInto(n3);
         // // the resulting paths are the same because they have been regenerated
@@ -554,17 +554,17 @@ describe("move", () => {
             "[Empty,Empty,Empty,Empty,2.1.2.2]" +
             "]");
         // check
-        const [n2after] = j1.getFirstStep().getItems();
-        const [n1after, n3after] = j2.getFirstStep().getItems();
-        expect(n1.getName()).toEqual(n1after.getName());
-        expect(n2.getName()).toEqual(n2after.getName());
-        expect(n3.getName()).toEqual(n3after.getName());
+        const [n2after] = j1.firstStep.items;
+        const [n1after, n3after] = j2.firstStep.items;
+        expect(n1.getTitle()).toEqual(n1after.getTitle());
+        expect(n2.getTitle()).toEqual(n2after.getTitle());
+        expect(n3.getTitle()).toEqual(n3after.getTitle());
     });
 
     it('move step, different journeys', () => {
         const [sm, j1, j2] = prep();
-        const s1 = j1.getFirstStep();
-        const s2 = j2.getFirstStep();
+        const s1 = j1.firstStep;
+        const s2 = j2.firstStep;
         expect(s1.canMoveInto(s2)).toEqual(true);
         // s2 cannot be removed from j2, since it's the only one
         expect(s2.canMoveInto(s1)).toEqual(false);

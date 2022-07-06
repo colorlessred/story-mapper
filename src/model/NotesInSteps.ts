@@ -1,5 +1,5 @@
-import {Note} from "./Note";
-import {Step} from "./Step";
+import {Note} from "./card/Note";
+import {Step} from "./card/Step";
 
 /** used by Version to track the Notes in each Step */
 export class NotesInSteps {
@@ -21,7 +21,7 @@ export class NotesInSteps {
 
     /** add all the steps, even the ones for which we have no notes */
     private addStep(step: Step) {
-        this.stepToNotes.set(step.getPath(), new Map());
+        this.stepToNotes.set(step.path, new Map());
         this.steps.push(step);
     }
 
@@ -34,10 +34,10 @@ export class NotesInSteps {
 
     /** add the notes, linking them to the proper steps */
     private addNote(note: Note) {
-        const stepPosition = note.getStep().getPath();
+        const stepPosition = note.getStep().path;
         let notes = this.stepToNotes.get(stepPosition);
         if (notes !== undefined) {
-            notes.set(note.getPath(), note);
+            notes.set(note.path, note);
         }
     }
 

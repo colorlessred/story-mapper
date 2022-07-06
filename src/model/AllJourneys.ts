@@ -1,5 +1,5 @@
 import {SmartArray} from "./SmartArray";
-import {Journey, JourneySerialized} from "./Journey";
+import {Journey, JourneySerialized} from "./card/Journey";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
 import {ISerializable} from "./serialize/ISerializable";
@@ -27,7 +27,7 @@ export class AllJourneys extends SmartArray<Journey> implements ISerializable<Al
         return {
             type: AllJourneys.serializedTypeName(),
             value: {
-                journeys: this.getItems().map(journey => serializer.getObject(journey))
+                journeys: this.items.map(journey => serializer.getObject(journey))
             }
         };
     }

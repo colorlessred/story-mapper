@@ -4,13 +4,13 @@ export interface IPathSerialized {
 }
 
 export interface IPath extends ISerializable<IPathSerialized> {
-    setPath(path: string): void;
+    set path(path: string);
 
-    getPath(): string;
-
-    /** zero-based */
-    setPositionInParent(position: number): void;
+    get path(): string;
 
     /** zero-based */
-    getPositionInParent(): number;
+    set positionInParent(position: number);
+
+    /** zero-based */
+    get positionInParent(): number;
 }

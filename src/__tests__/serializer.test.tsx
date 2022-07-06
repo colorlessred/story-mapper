@@ -1,15 +1,22 @@
 import {Serializer} from "../model/serialize/Serializer";
 import {ISerializable} from "../model/serialize/ISerializable";
 import {StoryMapper, StoryMapperSerialized} from "../model/StoryMapper";
-import {Step} from "../model/Step";
-import {Note} from "../model/Note";
+import {Step} from "../model/card/Step";
+import {Note} from "../model/card/Note";
 import {Deserializer, DeserializerFunction} from "../model/serialize/Deserializer";
 import {ISerialized} from "../model/serialize/ISerialized";
 import {AllVersions} from "../model/AllVersions";
-import {Version} from "../model/Version";
+import {Version} from "../model/card/Version";
 import {AllJourneys} from "../model/AllJourneys";
-import {Journey} from "../model/Journey";
+import {Journey} from "../model/card/Journey";
 import {stringify} from "flatted";
+
+const logAndCompare = (actual: string, expected: string) => {
+    if (actual !== expected) {
+        console.log(`{ actual: ${actual}, expected: ${expected}}`);
+    }
+    expect(actual).toEqual(expected);
+};
 
 describe('serializer', () => {
     it('class with primitives', () => {
@@ -97,10 +104,10 @@ describe('serializer', () => {
         const sm = new StoryMapper();
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
-        const s1_1 = j1.getFirstStep();
+        const s1_1 = j1.firstStep;
         Step.createAndPush(j1);
         Step.createAndPush(j1);
-        const s2_1 = j2.getFirstStep();
+        const s2_1 = j2.firstStep;
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
         Note.create("a", s1_1, v1, true, true);
@@ -187,18 +194,17 @@ describe("deserialize", () => {
         const sm = new StoryMapper();
         const j1 = sm.newJourney();
         const j2 = sm.newJourney();
-        const s1_1 = j1.getFirstStep();
+        const s1_1 = j1.firstStep;
         Step.createAndPush(j1);
         Step.createAndPush(j1);
-        const s2_1 = j2.getFirstStep();
+        const s2_1 = j2.firstStep;
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
         Note.create("a", s1_1, v1, true, true);
         Note.create("b", s1_1, v1, true, true);
         Note.create("c", s2_1, v2, true, true);
 
-        const serializer = new Serializer(sm);
-        const json = serializer.getJson();
+        const json = new Serializer(sm).getJson();
 
         // deserialize
         const deserializer = new Deserializer(json);
@@ -212,15 +218,22 @@ describe("deserialize", () => {
         deserializer.addDeserializer(Note.serializedTypeName(), Note.deserializerFunction);
 
         const sm2 = deserializer.deserialize<StoryMapperSerialized, StoryMapper>();
-        const serializer2 = new Serializer(sm2);
-        const json2 = serializer2.getJson();
 
-        // expect(json2).toEqual(json);
+        const allVersions1 = sm.getAllVersions().items;
+        const allVersions2 = sm2.getAllVersions().items;
 
-        let actual = stringify(sm2);
-        console.log(actual);
-        let expected = stringify(sm);
-        console.log(expected);
-        // expect(actual).toEqual(expected);
+        expect(allVersions2.length).toEqual(allVersions1.length);
+        for (let i = 0; i < allVersions1.length; i++) {
+            const v1 = allVersions1[i];
+            const v2 = allVersions2[i];
+            logAndCompare(v2.toStringNotesWithVersionNumber(), v1.toStringNotesWithVersionNumber());
+        }
+
+        // reserialize and check we get back the same JSON
+        logAndCompare(new Serializer(sm2).getJson(), json);
+
+        // compare the serialized version with another serializer that gets also all the
+        // internal structures, to make sure the internal state is rebuilt correctly
+        logAndCompare(stringify(sm2), stringify(sm));
     });
 });

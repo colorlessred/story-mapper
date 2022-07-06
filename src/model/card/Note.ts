@@ -1,13 +1,14 @@
-import {ICard} from "./ICard";
-import {Version} from "./Version";
-import {IPath} from "./IPath";
-import {Step} from "./Step";
-import {CardType} from "./Card";
+import {ICard} from "../../ICard";
+import {Version, VersionSerialized} from "./Version";
+import {IPath} from "../IPath";
+import {Step, StepSerialized} from "./Step";
+import {CardType} from "../../Card";
 import {EmptyAdder} from "./EmptyAdder";
-import {Serializer} from "./serialize/Serializer";
-import {ISerialized} from "./serialize/ISerialized";
-import {ISerializable} from "./serialize/ISerializable";
-import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
+import {Serializer} from "../serialize/Serializer";
+import {ISerialized} from "../serialize/ISerialized";
+import {ISerializable} from "../serialize/ISerializable";
+import {Deserializer, DeserializerFunction} from "../serialize/Deserializer";
+import {CommonCardData} from "../CommonCardData";
 
 export interface NoteSerialized {
     name: string,
@@ -21,14 +22,20 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     private version?: Version;
 
     /** string that represents the whole hierarchical position, journey.step.note */
-    private path: string = "";
-    private positionInParent: number = 0;
+    private _path: string = "";
+    private _positionInParent: number = 0;
 
     /** track the position only inside the version step */
     private positionInVersionStep: number = 0;
 
     /** Note path done with version: journey.version.positionInVersionStep */
     private pathWithVersion: string = "";
+
+    private readonly _commonCardData = new CommonCardData();
+
+    get commonCardData(): CommonCardData {
+        return this._commonCardData;
+    }
 
     public static create(name: string,
                          step: Step,
@@ -52,26 +59,6 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         this.name = name;
     }
 
-    // constructor(
-    //     name: string,
-    //     step: Step,
-    //     version: Version,
-    //     pushInStep: boolean = false,
-    //     addToVersion: boolean = false) {
-    //
-    //     this.name = name;
-    //     this.step = step;
-    //     this.version = version;
-    //
-    //     if (pushInStep) {
-    //         step.push(this);
-    //     }
-    //
-    //     if (addToVersion) {
-    //         version.addNote(this);
-    //     }
-    // }
-
     setStep(step: Step) {
         this.step = step;
     }
@@ -80,7 +67,15 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         this.version = version;
     }
 
-    getId(): string {
+    getTitle(): string {
+        return "some note title";
+    }
+
+    get visiblePath(): string {
+        return this.pathWithVersion;
+    }
+
+    get id(): string {
         return this.pathWithVersion;
     }
 
@@ -104,7 +99,7 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     private moveIntoEmptyAdder(emptyAdder: EmptyAdder) {
         this.delete();
         // add note to the step and version specified by the adder
-        this.moveToStepVersion(emptyAdder.getStep(), 1, emptyAdder.getVersion());
+        this.moveToStepVersion(emptyAdder.step, 1, emptyAdder.version);
     }
 
     private moveIntoNote(note: Note) {
@@ -115,7 +110,7 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
             this.delete();
 
             // attach it back into the new position
-            this.moveToStepVersion(targetNote.getStep(), targetNote.getPositionInParent() + 1, targetNote.version);
+            this.moveToStepVersion(targetNote.getStep(), targetNote.positionInParent + 1, targetNote.version);
         } else {
             throw new Error("target note doesn't have a version");
         }
@@ -136,12 +131,12 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         this.version.addNote(this);
     }
 
-    setPath(path: string): void {
-        this.path = path;
+    set path(path: string) {
+        this._path = path;
     }
 
-    getPath(): string {
-        return this.path;
+    get path(): string {
+        return this._path;
     }
 
     setPositionInVersionStep(position: number): void {
@@ -149,7 +144,7 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         // name should be: journey.step.version.noteIn
         if (this.version) {
             this.pathWithVersion =
-                [this.getStep().getPath(), this.version.getPath(), this.positionInVersionStep].join('.');
+                [this.getStep().path, this.version.path, this.positionInVersionStep].join('.');
         } else {
             throw new Error("Note doesn't have a version");
         }
@@ -181,32 +176,28 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         return (this.step !== undefined && this.version !== undefined);
     }
 
-    getName(): string {
-        return this.name;
-    }
-
     createNewNext(): void {
         if (this.step && this.version) {
             const newNote = Note.create("new note", this.step, this.version, false, true);
-            this.step.add(newNote, this.getPositionInParent() + 2);
+            this.step.add(newNote, this.positionInParent + 2);
         } else {
             throw new Error("Note doesn't have step and/or version");
         }
     }
 
-    getPositionInParent(): number {
-        return this.positionInParent;
+    get positionInParent(): number {
+        return this._positionInParent;
     }
 
-    setPositionInParent(position: number): void {
-        this.positionInParent = position;
+    set positionInParent(position: number) {
+        this._positionInParent = position;
     }
 
-    getType(): CardType {
+    get type(): CardType {
         return CardType.Note;
     }
 
-    showControls(): boolean {
+    canShowControls(): boolean {
         return true;
     }
 
@@ -243,7 +234,8 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
             return new Note(values.name);
         },
         (object: Note, values: NoteSerialized, deserializer: Deserializer) => {
-
+            object.setStep(deserializer.deserializeItem<StepSerialized, Step>(values.step));
+            object.setVersion(deserializer.deserializeItem<VersionSerialized, Version>(values.version));
         }
     );
 }

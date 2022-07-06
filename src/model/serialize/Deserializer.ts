@@ -100,6 +100,11 @@ export class Deserializer {
             // then add the values that need other references
             deserializerType.withReferences(deserialized, sItem.value, this);
             dItem = deserialized;
+
+            // run the final operation if the object needs to rebuild its internal structures
+            if (deserializerType.finalize) {
+                deserializerType.finalize(dItem);
+            }
         }
         return dItem;
     }

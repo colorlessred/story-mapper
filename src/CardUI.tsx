@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {Card} from "./model/Card";
+import {Card} from "./Card";
 import {StoryMapper} from "./model/StoryMapper";
 
 interface PropsControls {
@@ -66,7 +66,7 @@ export const CardUI = ({card, storyMapper}: PropsCardUI) => {
     };
 
     return (
-        <td className={`card card${card.getType()}`}
+        <td className={`card card${card.type}`}
             draggable={true}
             onDragStart={dragStartHandler}
             onDragOver={dragOverHandler}
@@ -74,7 +74,12 @@ export const CardUI = ({card, storyMapper}: PropsCardUI) => {
         >
             <div className="content">
                 <div className="cardContent">
-                    {card.getId()}
+                    <div className="cardPath">
+                        {card.visiblePath}
+                    </div>
+                    <div className="cardTitle">
+                        {card.commonCardData.title}
+                    </div>
                 </div>
                 <div className="controls">
                     <Controls card={card} storyMapper={storyMapper}/>

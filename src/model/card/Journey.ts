@@ -1,12 +1,13 @@
-import {SmartArray} from "./SmartArray";
-import {ICard} from "./ICard";
-import {AllJourneys} from "./AllJourneys";
+import {SmartArray} from "../SmartArray";
+import {ICard} from "../../ICard";
+import {AllJourneys, AllJourneysSerialized} from "../AllJourneys";
 import {Step, StepSerialized} from "./Step";
-import {CardType} from "./Card";
-import {ISerializable} from "./serialize/ISerializable";
-import {Serializer} from "./serialize/Serializer";
-import {ISerialized} from "./serialize/ISerialized";
-import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
+import {CardType} from "../../Card";
+import {ISerializable} from "../serialize/ISerializable";
+import {Serializer} from "../serialize/Serializer";
+import {ISerialized} from "../serialize/ISerialized";
+import {Deserializer, DeserializerFunction} from "../serialize/Deserializer";
+import {CommonCardData} from "../CommonCardData";
 
 export interface JourneySerialized {
     allJourneys?: number;
@@ -14,21 +15,26 @@ export interface JourneySerialized {
 }
 
 export class Journey extends SmartArray<Step> implements ICard, ISerializable<JourneySerialized> {
-    private allJourneys?: AllJourneys;
+    private _allJourneys?: AllJourneys;
+    private readonly _commonCardData = new CommonCardData();
 
     static createAndPush(allJourneys: AllJourneys, step: Step): Journey {
         const journey = new Journey();
-        journey.setStep(step);
-        journey.setAllJourneys(allJourneys);
+        journey.step = step;
+        journey.allJourneys = allJourneys;
         allJourneys.push(journey);
         return journey;
     }
 
-    setAllJourneys(allJourneys: AllJourneys) {
-        this.allJourneys = allJourneys;
+    get commonCardData(): CommonCardData {
+        return this._commonCardData;
     }
 
-    setStep(step: Step) {
+    set allJourneys(allJourneys: AllJourneys) {
+        this._allJourneys = allJourneys;
+    }
+
+    set step(step: Step) {
         this.push(step);
         step.setJourney(this);
     }
@@ -36,19 +42,23 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
     /**
      * Handy method to return first step, since it's often created implicitly
      */
-    getFirstStep(): Step {
+    get firstStep(): Step {
         if (this.isEmpty()) {
             throw new Error("Journey doesn't have a step");
         }
-        return this.getItems()[0];
+        return this.items[0];
     }
 
-    getName(): string {
-        return `J${this.getPath()}`;
+    get visiblePath(): string {
+        return this.path;
     }
 
-    getId(): string {
-        return `J${this.getPath()}`;
+    get id(): string {
+        return `J${this.path}`;
+    }
+
+    get type(): CardType {
+        return CardType.Journey;
     }
 
     /**
@@ -57,18 +67,14 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
     createNewNext(): void {
         // position in parent is zero-based, while adding we use 1-based, so it needs "+2"
         const journey = new Journey();
-        journey.setStep(new Step());
-        if (this.allJourneys !== undefined) {
-            journey.setAllJourneys(this.allJourneys);
-            this.allJourneys.add(journey, this.getPositionInParent() + 2);
+        journey.step = new Step();
+        if (this._allJourneys !== undefined) {
+            journey.allJourneys = this._allJourneys;
+            this._allJourneys.add(journey, this.positionInParent + 2);
         }
     }
 
-    getType(): CardType {
-        return CardType.Journey;
-    }
-
-    showControls(): boolean {
+    canShowControls(): boolean {
         return true;
     }
 
@@ -76,12 +82,12 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
      * journey can be deleted if it has just one empty step
      */
     canDelete(): boolean {
-        return (this.size() === 1) && (this.getFirstStep().isEmpty());
+        return (this.size() === 1) && (this.firstStep.isEmpty());
     }
 
     delete(): void {
         if (this.canDelete()) {
-            this.deleteItem(this.getFirstStep());
+            this.deleteItem(this.firstStep);
         }
     }
 
@@ -98,8 +104,8 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
     }
 
     moveInto(card: ICard): void {
-        if (this.canMoveInto(card) && card instanceof Journey && this.allJourneys !== undefined) {
-            this.allJourneys.move(this, card.getPositionInParent() + 1);
+        if (this.canMoveInto(card) && card instanceof Journey && this._allJourneys !== undefined) {
+            this._allJourneys.move(this, card.positionInParent + 1);
         }
     }
 
@@ -107,12 +113,11 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
         return {
             type: Journey.serializedTypeName(),
             value: {
-                allJourneys: serializer.getObject(this.allJourneys),
-                steps: this.getItems().map(step => serializer.getObject(step))
+                allJourneys: serializer.getObject(this._allJourneys),
+                steps: this.items.map(step => serializer.getObject(step))
             }
         };
     }
-
 
     public static serializedTypeName = () => 'Journey';
 
@@ -123,6 +128,9 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
                 const step = deserializer.deserializeItem<StepSerialized, Step>(stepId);
                 object.push(step);
             });
+            if (values.allJourneys) {
+                object.allJourneys = deserializer.deserializeItem<AllJourneysSerialized, AllJourneys>(values.allJourneys);
+            }
         }
     );
 }

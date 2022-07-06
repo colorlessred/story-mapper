@@ -1,5 +1,5 @@
 import {SmartArray} from "./SmartArray";
-import {Version, VersionSerialized} from "./Version";
+import {Version, VersionSerialized} from "./card/Version";
 import {ISerializable} from "./serialize/ISerializable";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
@@ -14,7 +14,7 @@ export class AllVersions extends SmartArray<Version> implements ISerializable<Al
         return {
             type: AllVersions.serializedTypeName(),
             value: {
-                versions: this.getItems().map(version => serializer.getObject(version))
+                versions: this.items.map(version => serializer.getObject(version))
             }
         };
     }

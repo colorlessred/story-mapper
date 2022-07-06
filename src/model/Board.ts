@@ -1,4 +1,4 @@
-import {Card} from "./Card";
+import {Card} from "../Card";
 import {Utils} from "./Utils";
 
 /** the global board from which we will build the UI */

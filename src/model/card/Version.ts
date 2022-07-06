@@ -1,15 +1,16 @@
-import {ICard} from "./ICard";
-import {AllVersions, AllVersionsSerialized} from "./AllVersions";
-import {NotesInSteps} from "./NotesInSteps";
-import {AllJourneys, AllJourneysSerialized} from "./AllJourneys";
+import {ICard} from "../../ICard";
+import {AllVersions, AllVersionsSerialized} from "../AllVersions";
+import {NotesInSteps} from "../NotesInSteps";
+import {AllJourneys, AllJourneysSerialized} from "../AllJourneys";
 import {Note, NoteSerialized} from "./Note";
-import {IPath} from "./IPath";
+import {IPath} from "../IPath";
 import {Step} from "./Step";
-import {CardType} from "./Card";
-import {Serializer} from "./serialize/Serializer";
-import {ISerialized} from "./serialize/ISerialized";
-import {ISerializable} from "./serialize/ISerializable";
-import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
+import {CardType} from "../../Card";
+import {Serializer} from "../serialize/Serializer";
+import {ISerialized} from "../serialize/ISerialized";
+import {ISerializable} from "../serialize/ISerializable";
+import {Deserializer, DeserializerFunction} from "../serialize/Deserializer";
+import {CommonCardData} from "../CommonCardData";
 
 export interface VersionSerialized {
     name: string,
@@ -26,25 +27,33 @@ export interface VersionSerialized {
 export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
     private readonly name: string;
     private notes: Set<Note> = new Set<Note>();
-    private path: string = "";
-    private positionInParent: number = 0;
+    private _path: string = "";
+    private _positionInParent: number = 0;
     private allJourneys?: AllJourneys;
     private notesInStep: NotesInSteps;
     private allVersions?: AllVersions;
 
-    constructor(name: string, allJourneys?: AllJourneys, allVersions?: AllVersions, position?: number) {
+    private readonly _commonCardData = new CommonCardData();
+
+    get commonCardData(): CommonCardData {
+        return this._commonCardData;
+    }
+
+    static createAndPush(name: string, allJourneys: AllJourneys): Version {
+        const version = new Version(name);
+        version.setAllJourneys(allJourneys);
+        return version;
+    }
+
+    static createAndPushVersion(name: string, allJourneys: AllJourneys, allVersions: AllVersions): Version {
+        const version = Version.createAndPush(name, allJourneys);
+        version.setAllVersions(allVersions);
+        allVersions.push(version);
+        return version;
+    }
+
+    constructor(name: string) {
         this.name = name;
-        this.allJourneys = allJourneys;
-
-        if (allVersions) {
-            this.allVersions = allVersions;
-            if (position !== undefined) {
-                allVersions.add(this, position);
-            } else {
-                allVersions.push(this);
-            }
-        }
-
         this.notesInStep = this.rebuildInternalStructure();
     }
 
@@ -58,12 +67,12 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
         this.rebuildInternalStructure();
     }
 
-    setPath(path: string): void {
-        this.path = path;
+    set path(path: string) {
+        this._path = path;
     }
 
-    getPath(): string {
-        return this.path;
+    get path(): string {
+        return this._path;
     }
 
     addNote(note: Note) {
@@ -76,8 +85,8 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
         }
     }
 
-    getId(): string {
-        return `V${this.getPath()}`;
+    get id(): string {
+        return `V${this.path}`;
     }
 
     toString(): string {
@@ -107,11 +116,7 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
             out.push('[');
             this.notesInStep.getArrayArray().forEach((array) => {
                 out.push('[');
-                const notes: string[] = [];
-                array.forEach((note) => {
-                    notes.push(note.toStringVersion());
-                });
-                out.push(notes.join(','));
+                out.push(array.map(note => note.toStringVersion()).join(','));
                 out.push(']');
             });
             out.push(']');
@@ -120,13 +125,14 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
     }
 
     /** track the Notes per Step */
-    private rebuildInternalStructure(): NotesInSteps {
+    public rebuildInternalStructure(): NotesInSteps {
+        // console.log(`Rebuild internal structures on Version ${this.name}`);
         // get all the steps starting from the top allJourneys object, which
         // needs to be the root of all the journeys
         const allSteps: Step[] = [];
         if (this.allJourneys !== undefined) {
-            this.allJourneys.getItems().forEach((journey) => {
-                journey.getItems().forEach((step) => {
+            this.allJourneys.items.forEach((journey) => {
+                journey.items.forEach((step) => {
                     allSteps.push(step);
                 });
             });
@@ -136,32 +142,37 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
         return this.notesInStep;
     }
 
-    getName(): string {
-        return `V${this.getPath()}`;
-    }
-
     createNewNext(): void {
         if (this.allVersions === undefined) {
             throw new Error("Cannot create new next Version if I don't know the AllVersions");
         }
 
-        new Version("new Version", this.allJourneys, this.allVersions, this.positionInParent + 2);
+        const version = new Version("new Version");
+        if (this.allJourneys) {
+            version.setAllJourneys(this.allJourneys);
+        }
+        version.setAllVersions(this.allVersions);
+        this.allVersions.add(version, this.positionInParent + 2);
     }
 
-    getPositionInParent(): number {
-        return this.positionInParent;
+    get positionInParent(): number {
+        return this._positionInParent;
     }
 
-    setPositionInParent(position: number): void {
-        this.positionInParent = position;
+    set positionInParent(position: number) {
+        this._positionInParent = position;
     }
 
-    getType(): CardType {
+    get type(): CardType {
         return CardType.Version;
     }
 
-    showControls(): boolean {
+    canShowControls(): boolean {
         return true;
+    }
+
+    get visiblePath(): string {
+        return this.path;
     }
 
     canDelete(): boolean {
@@ -192,7 +203,7 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
             const version: Version = card;
             // must be in the same "board" to make sense
             if (this.allVersions === version.allVersions) {
-                this.allVersions.move(this, version.getPositionInParent() + 1);
+                this.allVersions.move(this, version.positionInParent + 1);
             }
         }
     }

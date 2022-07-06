@@ -1,4 +1,5 @@
 import {ICard} from "./ICard";
+import {CommonCardData} from "./model/CommonCardData";
 
 /** the Card that composes the board. Made of anything that implements ICard,
  * like the hierarchical types (Journey, Step, Note), but also empty or button-like cards
@@ -27,12 +28,29 @@ export class Card {
         return this.key;
     }
 
-    getType(): string {
-        return CardType[this.baseElement.getType()];
+    get commonCardData(): CommonCardData {
+        return this.baseElement.commonCardData;
+    }
+
+    //
+    // getContent(): string {
+    //     return this.baseElement.getCommonCardData().content;
+    // }
+    //
+    // getTitle(): string {
+    //     return this.baseElement.getCommonCardData().title;
+    // }
+
+    get type(): string {
+        return CardType[this.baseElement.type];
+    }
+
+    get visiblePath(): string {
+        return this.baseElement.visiblePath;
     }
 
     toString(): string {
-        return this.baseElement.getName();
+        return this.baseElement.commonCardData.title;
     }
 
     createNewNext(): void {
@@ -40,7 +58,7 @@ export class Card {
     }
 
     showControls(): boolean {
-        return this.baseElement.showControls();
+        return this.baseElement.canShowControls();
     }
 
     canDelete(): boolean {
@@ -52,7 +70,7 @@ export class Card {
     }
 
     getId(): string {
-        return this.baseElement.getId();
+        return this.baseElement.id;
     }
 
     canMoveInto(card: Card): boolean {

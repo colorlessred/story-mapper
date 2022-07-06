@@ -1,15 +1,15 @@
-import {EmptyContent} from "./EmptyContent";
-import {Card} from "./Card";
+import {EmptyContent} from "./card/EmptyContent";
+import {Card} from "../Card";
 import {Board} from "./Board";
-import {Version} from "./Version";
+import {Version} from "./card/Version";
 import {AllVersions, AllVersionsSerialized} from "./AllVersions";
 import {AllJourneys, AllJourneysSerialized} from "./AllJourneys";
-import {Note} from "./Note";
-import {Journey} from "./Journey";
-import {Step} from "./Step";
-import {EmptyAdder} from "./EmptyAdder";
+import {Note} from "./card/Note";
+import {Journey} from "./card/Journey";
+import {Step} from "./card/Step";
+import {EmptyAdder} from "./card/EmptyAdder";
 import {NotesInSteps} from "./NotesInSteps";
-import {ICard} from "./ICard";
+import {ICard} from "../ICard";
 import {ISerializable} from "./serialize/ISerializable";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
@@ -31,6 +31,10 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
     constructor() {
     }
 
+    public getAllVersions(): AllVersions {
+        return this.allVersions;
+    }
+
     public setDraggedCard(card: Card) {
         this.draggedCard = card;
     }
@@ -47,7 +51,7 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
     }
 
     addVersion(name: string): Version {
-        return new Version(name, this.allJourneys, this.allVersions);
+        return Version.createAndPushVersion(name, this.allJourneys, this.allVersions);
     }
 
     addStep(journey: Journey): Step {
@@ -73,8 +77,8 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
         board.addCard(new Card(new EmptyContent()));
         // row of journeys
         const stepCards: Card[] = [];
-        this.allJourneys.getItems().forEach((journey, rowIndex) => {
-            const itemsNum = journey.getItems().length;
+        this.allJourneys.items.forEach((journey, rowIndex) => {
+            const itemsNum = journey.items.length;
             for (let colIndex = 0; colIndex < itemsNum; colIndex++) {
                 if (colIndex === 0) {
                     board.addCard(new Card(journey));
@@ -82,7 +86,7 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
                     board.addCard(new Card(new EmptyContent()));
                 }
                 if (colIndex < itemsNum) {
-                    stepCards.push(new Card(journey.getItems()[colIndex]));
+                    stepCards.push(new Card(journey.items[colIndex]));
                 } else {
                     stepCards.push(new Card(new EmptyContent()));
                 }
@@ -95,7 +99,7 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
         stepCards.forEach((card) => board.addCard(card));
         board.endLine();
         // versions
-        this.allVersions.getItems().forEach((version) => {
+        this.allVersions.items.forEach((version) => {
             const notesInSteps: NotesInSteps = version.getNotesInSteps();
             /** longest notes in step, or 1 if none */
             const rows = Math.max(notesInSteps.getMaxSize(), 1);
@@ -135,6 +139,16 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
         }
 
         return board;
+    }
+
+    /**
+     * rebuild all internal data structures. This might be necessary as last step in the
+     * deserialization
+     */
+    rebuildAll() {
+        this.getAllVersions().items.forEach(version => {
+            version.rebuildInternalStructure();
+        });
     }
 
     toSerialized(serializer: Serializer): ISerialized<StoryMapperSerialized> {

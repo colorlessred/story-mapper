@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import './App.css';
 import {StoryMapper} from "./model/StoryMapper";
 import {CardUI} from "./CardUI";
-import {Card} from "./model/Card";
+import {Card} from "./Card";
 import {Board} from "./model/Board";
 
 const Row = (arrayCard: Card[], index: number, storyMapper: StoryMapper) => {
