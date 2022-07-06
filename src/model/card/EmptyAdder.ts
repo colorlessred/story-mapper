@@ -1,5 +1,5 @@
-import {ICard} from "../../ICard";
-import {CardType} from "../../Card";
+import {ICard} from "../ICard";
+import {CardType} from "../../ui/Card";
 import {Step} from "./Step";
 import {Version} from "./Version";
 import {Note} from "./Note";

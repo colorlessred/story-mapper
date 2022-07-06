@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import './App.css';
-import {StoryMapper} from "./model/StoryMapper";
-import {CardUI} from "./CardUI";
+import {StoryMapper} from "../model/StoryMapper";
+import {CardUI} from "./card/CardUI";
 import {Card} from "./Card";
-import {Board} from "./model/Board";
+import {Board} from "../model/Board";
 
 const Row = (arrayCard: Card[], index: number, storyMapper: StoryMapper) => {
     return (<tr key={`row-${index}`}>
@@ -15,18 +15,18 @@ interface Props {
     storyMapper: StoryMapper;
 }
 
+const getRandomName = () => {
+    return "note" + Math.floor(Math.random() * 1000);
+};
+
 export function BoardUI({storyMapper}: Props) {
     const [board, setBoard] = useState<Board>(storyMapper.buildBoard(false));
 
     const refresh = (board: Board) => {
         setBoard(board);
-    }
-    storyMapper.setBoardRefreshHook(refresh);
+    };
 
-    const addJourney = () => {
-        storyMapper.newJourney();
-        storyMapper.buildBoard();
-    }
+    storyMapper.boardRefreshHook = refresh;
 
     const populateBoard = () => {
         const j1 = storyMapper.newJourney();
@@ -36,11 +36,12 @@ export function BoardUI({storyMapper}: Props) {
         const s3 = storyMapper.addStep(j1);
         const v1 = storyMapper.addVersion("v1");
         const v2 = storyMapper.addVersion("v2");
-        storyMapper.addNote("note", s1, v1);
-        storyMapper.addNote("note", s2, v1);
-        storyMapper.addNote("note", s1, v2);
-        storyMapper.addNote("note", s1, v2);
-        storyMapper.addNote("note", s2, v1);
+        storyMapper.addNote(getRandomName(), s1, v1);
+        storyMapper.addNote(getRandomName(), s2, v1);
+        storyMapper.addNote(getRandomName(), s1, v2);
+        storyMapper.addNote(getRandomName(), s1, v2);
+        storyMapper.addNote(getRandomName(), s2, v1);
+        storyMapper.addNote(getRandomName(), s3, v2);
         storyMapper.buildBoard();
     };
 

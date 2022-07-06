@@ -1,5 +1,5 @@
 import {EmptyContent} from "./card/EmptyContent";
-import {Card} from "../Card";
+import {Card} from "../ui/Card";
 import {Board} from "./Board";
 import {Version} from "./card/Version";
 import {AllVersions, AllVersionsSerialized} from "./AllVersions";
@@ -9,7 +9,7 @@ import {Journey} from "./card/Journey";
 import {Step} from "./card/Step";
 import {EmptyAdder} from "./card/EmptyAdder";
 import {NotesInSteps} from "./NotesInSteps";
-import {ICard} from "../ICard";
+import {ICard} from "./ICard";
 import {ISerializable} from "./serialize/ISerializable";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
@@ -43,7 +43,7 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
         return this.draggedCard;
     }
 
-    private boardRefreshHook: (board: Board) => void = (board: Board) => {
+    private _boardRefreshHook: (board: Board) => void = (board: Board) => {
     };
 
     newJourney(): Journey {
@@ -66,8 +66,8 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
      * set the action that will be performed when the board is refreshed
      * @param fn
      */
-    setBoardRefreshHook(fn: (board: Board) => void): void {
-        this.boardRefreshHook = fn;
+    set boardRefreshHook(fn: (board: Board) => void) {
+        this._boardRefreshHook = fn;
     }
 
     /** loop over all the data and create the board */
@@ -77,78 +77,70 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
         board.addCard(new Card(new EmptyContent()));
         // row of journeys
         const stepCards: Card[] = [];
-        this.allJourneys.items.forEach((journey, rowIndex) => {
-            const itemsNum = journey.items.length;
-            for (let colIndex = 0; colIndex < itemsNum; colIndex++) {
-                if (colIndex === 0) {
-                    board.addCard(new Card(journey));
-                } else {
-                    board.addCard(new Card(new EmptyContent()));
-                }
-                if (colIndex < itemsNum) {
-                    stepCards.push(new Card(journey.items[colIndex]));
-                } else {
-                    stepCards.push(new Card(new EmptyContent()));
-                }
-            }
-        });
+        this.addJourneysToBoard(board, stepCards);
         board.endLine();
         // version column
         board.addCard(new Card(new EmptyContent()));
         // row of steps
         stepCards.forEach((card) => board.addCard(card));
         board.endLine();
-        // versions
         this.allVersions.items.forEach((version) => {
-            const notesInSteps: NotesInSteps = version.getNotesInSteps();
-            /** longest notes in step, or 1 if none */
-            const rows = Math.max(notesInSteps.getMaxSize(), 1);
-            /** number of steps */
-            const cols = notesInSteps.getStepsSize();
-            const arrayArrayNotes = notesInSteps.getArrayArray();
-            for (let row = 0; row < rows; row++) {
-                for (let col = 0; col < cols; col++) {
-                    if (col === 0) {
-                        if (row === 0) {
-                            board.addCard(new Card(version));
-                        } else {
-                            board.addCard(new Card(new EmptyContent()));
-                        }
-                    }
-                    const arrayNotes: Note[] = arrayArrayNotes[col];
-                    if (row < arrayNotes.length) {
-                        const note: Note = arrayNotes[row];
-                        board.addCard(new Card(note));
-                    } else if (row === 0) {
-                        // first card in a version/step that has no notes
-                        // => create special card that allows for creation of
-                        // a note in this version/step
-                        const card: ICard = new EmptyAdder(version, notesInSteps.getStep(col));
-                        board.addCard(new Card(card));
-                    } else {
-                        board.addCard(new Card(new EmptyContent()));
-                    }
-                }
-                board.endLine();
-            }
+            this.addVersionToBoard(version, board);
         });
 
         if (callHooks) {
             // execute the hook. This can be used by the UI to cause the page refresh
-            this.boardRefreshHook(board);
+            this._boardRefreshHook(board);
         }
 
         return board;
     }
 
-    /**
-     * rebuild all internal data structures. This might be necessary as last step in the
-     * deserialization
-     */
-    rebuildAll() {
-        this.getAllVersions().items.forEach(version => {
-            version.rebuildInternalStructure();
+    private addJourneysToBoard(board: Board, stepCards: Card[]) {
+        this.allJourneys.items.forEach((journey, rowIndex) => {
+            const itemsNum = journey.items.length;
+            for (let colIndex = 0; colIndex < itemsNum; colIndex++) {
+                const icard: ICard = (colIndex === 0) ? journey : new EmptyContent();
+                board.addCard(new Card(icard));
+                stepCards.push(new Card(journey.items[colIndex]));
+            }
         });
+    }
+
+    private addVersionToBoard(version: Version, board: Board) {
+        const notesInSteps: NotesInSteps = version.getNotesInSteps();
+        /** longest notes in step, or 1 if none */
+        const rows = Math.max(notesInSteps.getMaxSize(), 1);
+        /** number of steps */
+        const cols = notesInSteps.getStepsSize();
+        const arrayArrayNotes = notesInSteps.getArrayArray();
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                if (col === 0) {
+                    if (row === 0) {
+                        board.addCard(new Card(version));
+                    } else {
+                        board.addCard(new Card(new EmptyContent()));
+                    }
+                }
+                const arrayNotes: Note[] = arrayArrayNotes[col];
+                board.addCard(new Card(StoryMapper.getICard(row, arrayNotes, version, notesInSteps, col)));
+            }
+            board.endLine();
+        }
+    }
+
+    private static getICard(row: number, arrayNotes: Note[], version: Version, notesInSteps: NotesInSteps, col: number): ICard {
+        if (row < arrayNotes.length) {
+            return arrayNotes[row];
+        } else if (row === 0) {
+            // first card in a version/step that has no notes
+            // => create special card that allows for creation of
+            // a note in this version/step
+            return new EmptyAdder(version, notesInSteps.getStep(col));
+        } else {
+            return new EmptyContent();
+        }
     }
 
     toSerialized(serializer: Serializer): ISerialized<StoryMapperSerialized> {
@@ -167,10 +159,10 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
         (values: StoryMapperSerialized) => new StoryMapper()
         ,
         (object: StoryMapper, values: StoryMapperSerialized, deserializer: Deserializer) => {
-            if (values.allVersions !== undefined) {
+            if (values.allVersions) {
                 object.allVersions = deserializer.deserializeItem<AllVersionsSerialized, AllVersions>(values.allVersions);
             }
-            if (values.allJourneys !== undefined) {
+            if (values.allJourneys) {
                 object.allJourneys = deserializer.deserializeItem<AllJourneysSerialized, AllJourneys>(values.allJourneys);
             }
         }

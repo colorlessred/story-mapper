@@ -1,8 +1,8 @@
 import {SmartArray} from "../SmartArray";
-import {ICard} from "../../ICard";
+import {ICard} from "../ICard";
 import {AllJourneys, AllJourneysSerialized} from "../AllJourneys";
 import {Step, StepSerialized} from "./Step";
-import {CardType} from "../../Card";
+import {CardType} from "../../ui/Card";
 import {ISerializable} from "../serialize/ISerializable";
 import {Serializer} from "../serialize/Serializer";
 import {ISerialized} from "../serialize/ISerialized";

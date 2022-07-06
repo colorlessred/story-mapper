@@ -8,7 +8,7 @@ import {Note} from "../model/card/Note";
 import {Journey} from "../model/card/Journey";
 import {Step} from "../model/card/Step";
 import {Board} from "../model/Board";
-import {Card} from "../Card";
+import {Card} from "../ui/Card";
 import {EmptyAdder} from "../model/card/EmptyAdder";
 
 describe("Smart Array", () => {
@@ -293,9 +293,9 @@ describe("story mapper", () => {
 
     let hookCalled = false;
 
-    sm.setBoardRefreshHook(() => {
+    sm.boardRefreshHook = () => {
         hookCalled = true;
-    });
+    };
 
     it('board', () => {
         expect(hookCalled).toEqual(false);
@@ -369,10 +369,7 @@ describe("add next", () => {
         // it will create one intermediate entry between j1 and j2
         it('board', () => {
             expect(sm.buildBoard().toString())
-                .toEqual("[[Empty,J1,Empty,Empty,J2,J3]" +
-                    "[Empty,S1.1,S1.2,S1.3,S2.1,S3.1]" +
-                    "[V1,1.1.1.1,Adder.0.1,Adder.0.2,Adder.0.0,Adder.0.0]" +
-                    "[V2,Adder.1.0,Adder.1.1,Adder.1.2,Adder.1.0,Adder.1.0]]");
+                .toEqual("[[Empty,J1,Empty,Empty,J2,J3][Empty,S1.1,S1.2,S1.3,S2.1,S3.1][V1,1.1.1.1/n,Adder.0.1,Adder.0.2,Adder.0.0,Adder.0.0][V2,Adder.1.0,Adder.1.1,Adder.1.2,Adder.1.0,Adder.1.0]]");
         });
     });
 
@@ -405,10 +402,7 @@ describe("delete", () => {
         return [sm, j1, j2, v1, v2];
     }
 
-    const DEFAULT_SM: string = "[[Empty,J1,Empty,Empty,J2]" +
-        "[Empty,S1.1,S1.2,S1.3,S2.1]" +
-        "[V1,1.1.1.1,Adder.0.1,Adder.0.2,Adder.0.0]" +
-        "[V2,Adder.1.0,Adder.1.1,Adder.1.2,Adder.1.0]]";
+    const DEFAULT_SM: string = "[[Empty,J1,Empty,Empty,J2][Empty,S1.1,S1.2,S1.3,S2.1][V1,1.1.1.1/a,Adder.0.1,Adder.0.2,Adder.0.0][V2,Adder.1.0,Adder.1.1,Adder.1.2,Adder.1.0]]";
 
     it('default', () => {
         // default case without any modifications
@@ -434,10 +428,7 @@ describe("delete", () => {
         expect(S1_2.canDelete()).toEqual(true);
         S1_2.delete();
         expect(sm.buildBoard().toString()).toEqual(
-            "[[Empty,J1,Empty,J2]" +
-            "[Empty,S1.1,S1.2,S2.1]" +
-            "[V1,1.1.1.1,Adder.0.1,Adder.0.0]" +
-            "[V2,Adder.1.0,Adder.1.1,Adder.1.0]]");
+            "[[Empty,J1,Empty,J2][Empty,S1.1,S1.2,S2.1][V1,1.1.1.1/a,Adder.0.1,Adder.0.0][V2,Adder.1.0,Adder.1.1,Adder.1.0]]");
     });
 
     it('delete non-empty step', () => {
@@ -456,10 +447,7 @@ describe("delete", () => {
         expect(j2.canDelete()).toEqual(true);
         j2.delete();
         expect(sm.buildBoard().toString()).toEqual(
-            "[[Empty,J1,Empty,Empty]" +
-            "[Empty,S1.1,S1.2,S1.3]" +
-            "[V1,1.1.1.1,Adder.0.1,Adder.0.2]" +
-            "[V2,Adder.1.0,Adder.1.1,Adder.1.2]]");
+            "[[Empty,J1,Empty,Empty][Empty,S1.1,S1.2,S1.3][V1,1.1.1.1/a,Adder.0.1,Adder.0.2][V2,Adder.1.0,Adder.1.1,Adder.1.2]]");
     });
 
     it('delete journey with non empty steps', () => {
@@ -474,9 +462,7 @@ describe("delete", () => {
         expect(v2.canDelete()).toEqual(true);
         v2.delete();
         expect(sm.buildBoard().toString()).toEqual(
-            "[[Empty,J1,Empty,Empty,J2]" +
-            "[Empty,S1.1,S1.2,S1.3,S2.1]" +
-            "[V1,1.1.1.1,Adder.0.1,Adder.0.2,Adder.0.0]]");
+            "[[Empty,J1,Empty,Empty,J2][Empty,S1.1,S1.2,S1.3,S2.1][V1,1.1.1.1/a,Adder.0.1,Adder.0.2,Adder.0.0]]");
     });
 
     it('delete non empty version', () => {
@@ -504,11 +490,7 @@ describe("move", () => {
         return [sm, j1, j2, v1, v2];
     }
 
-    const DEFAULT_SM: string = "[[Empty,J1,Empty,Empty,J2]" +
-        "[Empty,S1.1,S1.2,S1.3,S2.1]" +
-        "[V1,1.1.1.1,Adder.0.1,Adder.0.2,Adder.0.0]" +
-        "[Empty,1.1.1.2,Empty,Empty,Empty]" +
-        "[V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1]]";
+    const DEFAULT_SM: string = "[[Empty,J1,Empty,Empty,J2][Empty,S1.1,S1.2,S1.3,S2.1][V1,1.1.1.1/a,Adder.0.1,Adder.0.2,Adder.0.0][Empty,1.1.1.2/b,Empty,Empty,Empty][V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1/c]]";
 
     it('default', () => {
         // default case without any modifications
@@ -523,12 +505,17 @@ describe("move", () => {
         expect(sm.buildBoard().toString()).toEqual(DEFAULT_SM);
         expect(n1.positionInParent).toEqual(0);
         expect(n2.positionInParent).toEqual(1);
+        const n1title = n1.commonCardData.title;
+        const n2title = n2.commonCardData.title;
         n2.moveInto(n1);
+        expect(n1.commonCardData.title).toEqual(n1title);
+        expect(n2.commonCardData.title).toEqual(n2title);
         // check they reversed position
         expect(n1.positionInParent).toEqual(1);
         expect(n2.positionInParent).toEqual(0);
+
         // the resulting paths are the same because they have been regenerated
-        expect(sm.buildBoard().toString()).toEqual(DEFAULT_SM);
+        expect(sm.buildBoard().toString()).toEqual("[[Empty,J1,Empty,Empty,J2][Empty,S1.1,S1.2,S1.3,S2.1][V1,1.1.1.1/b,Adder.0.1,Adder.0.2,Adder.0.0][Empty,1.1.1.2/a,Empty,Empty,Empty][V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1/c]]");
         // check they swapped
         const [n2after, n1after] = j1.firstStep.items;
         expect(n1).toEqual(n1after);
@@ -611,8 +598,8 @@ describe("move", () => {
         const adder: Card = board.getCard(2, 2);
         expect(note.baseElement instanceof Note).toBeTruthy();
         expect(adder.baseElement instanceof EmptyAdder).toBeTruthy();
-        expect(note.getId()).toEqual("1.1.1.1");
-        expect(adder.getId()).toEqual("Adder.0.1");
+        expect(note.id).toEqual("1.1.1.1");
+        expect(adder.id).toEqual("Adder.0.1");
         expect(note.canMoveInto(adder)).toBeTruthy();
         note.moveInto(adder);
         expect(sm.buildBoard().toString()).toEqual(
@@ -620,7 +607,6 @@ describe("move", () => {
             "[Empty,S1.1,S1.2,S1.3,S2.1]" +
             "[V1,1.1.1.1,1.2.1.1,Adder.0.2,Adder.0.0]" +
             "[V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1]]");
-
-    })
+    });
 
 });

@@ -1,5 +1,5 @@
-import {CardType} from "./Card";
-import {CommonCardData} from "./model/CommonCardData";
+import {CardType} from "../ui/Card";
+import {CommonCardData} from "./CommonCardData";
 
 /**
  * something that can be displayed on the UI as a card.

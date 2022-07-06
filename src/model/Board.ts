@@ -1,4 +1,4 @@
-import {Card} from "../Card";
+import {Card} from "../ui/Card";
 import {Utils} from "./Utils";
 
 /** the global board from which we will build the UI */
@@ -38,7 +38,10 @@ export class Board {
         const out: string[] = [];
         out.push('[');
         this.cards.forEach((arrayCard) => {
-            out.push('[' + arrayCard.map((card) => card.getId()).join(',') + ']');
+            out.push('[' + arrayCard.map((card) => {
+                const title = (card.commonCardData.title!=="") ? '/' + card.commonCardData.title : "";
+                return `${card.id}${title}`;
+            }).join(',') + ']');
         });
         out.push(']');
 

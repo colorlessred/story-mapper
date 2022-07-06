@@ -1,11 +1,11 @@
-import {ICard} from "../../ICard";
+import {ICard} from "../ICard";
 import {AllVersions, AllVersionsSerialized} from "../AllVersions";
 import {NotesInSteps} from "../NotesInSteps";
 import {AllJourneys, AllJourneysSerialized} from "../AllJourneys";
 import {Note, NoteSerialized} from "./Note";
 import {IPath} from "../IPath";
 import {Step} from "./Step";
-import {CardType} from "../../Card";
+import {CardType} from "../../ui/Card";
 import {Serializer} from "../serialize/Serializer";
 import {ISerialized} from "../serialize/ISerialized";
 import {ISerializable} from "../serialize/ISerializable";

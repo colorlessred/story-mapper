@@ -1,8 +1,8 @@
-import {ICard} from "../../ICard";
+import {ICard} from "../ICard";
 import {Version, VersionSerialized} from "./Version";
 import {IPath} from "../IPath";
 import {Step, StepSerialized} from "./Step";
-import {CardType} from "../../Card";
+import {CardType} from "../../ui/Card";
 import {EmptyAdder} from "./EmptyAdder";
 import {Serializer} from "../serialize/Serializer";
 import {ISerialized} from "../serialize/ISerialized";
@@ -18,8 +18,8 @@ export interface NoteSerialized {
 
 export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
 
-    private step?: Step;
-    private version?: Version;
+    private _step?: Step;
+    private _version?: Version;
 
     /** string that represents the whole hierarchical position, journey.step.note */
     private _path: string = "";
@@ -48,8 +48,8 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
                          addToVersion: boolean = false): Note {
         const note = new Note();
         note.commonCardData.title = title;
-        note.setStep(step);
-        note.setVersion(version);
+        note.step = step;
+        note.version = version;
         if (pushInStep) {
             step.push(note);
         }
@@ -60,12 +60,12 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         return note;
     }
 
-    setStep(step: Step) {
-        this.step = step;
+    set step(step: Step) {
+        this._step = step;
     }
 
-    setVersion(version: Version) {
-        this.version = version;
+    set version(version: Version) {
+        this._version = version;
     }
 
     get visiblePath(): string {
@@ -102,12 +102,12 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     private moveIntoNote(note: Note) {
         const targetNote: Note = note;
 
-        if (targetNote.version) {
+        if (targetNote._version) {
             // detach the note from the current version & step
             this.delete();
 
             // attach it back into the new position
-            this.moveToStepVersion(targetNote.getStep(), targetNote.positionInParent + 1, targetNote.version);
+            this.moveToStepVersion(targetNote.getStep(), targetNote.positionInParent + 1, targetNote._version);
         } else {
             throw new Error("target note doesn't have a version");
         }
@@ -121,11 +121,11 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
      * @private
      */
     private moveToStepVersion(step: Step, positionInStep: number, version: Version) {
-        this.step = step;
-        this.step.add(this, positionInStep);
+        this._step = step;
+        this._step.add(this, positionInStep);
 
-        this.version = version;
-        this.version.addNote(this);
+        this._version = version;
+        this._version.addNote(this);
     }
 
     set path(path: string) {
@@ -139,9 +139,9 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     setPositionInVersionStep(position: number): void {
         this.positionInVersionStep = position;
         // name should be: journey.step.version.noteIn
-        if (this.version) {
+        if (this._version) {
             this.pathWithVersion =
-                [this.getStep().path, this.version.path, this.positionInVersionStep].join('.');
+                [this.getStep().path, this._version.path, this.positionInVersionStep].join('.');
         } else {
             throw new Error("Note doesn't have a version");
         }
@@ -156,8 +156,8 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     }
 
     getStep(): Step {
-        if (this.step) {
-            return this.step;
+        if (this._step) {
+            return this._step;
         } else {
             throw new Error("Note doesn't have a step");
         }
@@ -170,13 +170,13 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         // this is fairly ugly. To be deserialized the Note needs to have a constructor
         // with only primitives. But a note without its Step and Version shouldn't really be
         // used by other classes
-        return (this.step !== undefined && this.version !== undefined);
+        return (this._step !== undefined && this._version !== undefined);
     }
 
     createNewNext(): void {
-        if (this.step && this.version) {
-            const newNote = Note.create("a", this.step, this.version, false, true);
-            this.step.add(newNote, this.positionInParent + 2);
+        if (this._step && this._version) {
+            const newNote = Note.create("a", this._step, this._version, false, true);
+            this._step.add(newNote, this.positionInParent + 2);
         } else {
             throw new Error("Note doesn't have step and/or version");
         }
@@ -203,10 +203,10 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     }
 
     delete(): void {
-        if (this.version && this.step) {
+        if (this._version && this._step) {
             if (this.canDelete()) {
-                this.version.deleteNote(this);
-                this.step.deleteItem(this);
+                this._version.deleteNote(this);
+                this._step.deleteItem(this);
             }
         } else {
             throw new Error("Note doesn't have version and/or step");
@@ -218,8 +218,8 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
             type: Note.serializedTypeName(),
             value: {
                 commonCardData: serializer.getObject(this.commonCardData),
-                step: serializer.getObject(this.step),
-                version: serializer.getObject(this.version)
+                step: serializer.getObject(this._step),
+                version: serializer.getObject(this._version)
             }
         };
     }
@@ -229,8 +229,8 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     public static deserializerFunction = new DeserializerFunction<NoteSerialized, Note>(
         (values: NoteSerialized) => new Note(),
         (object: Note, values: NoteSerialized, deserializer: Deserializer) => {
-            object.setStep(deserializer.deserializeItem<StepSerialized, Step>(values.step));
-            object.setVersion(deserializer.deserializeItem<VersionSerialized, Version>(values.version));
+            object.step = deserializer.deserializeItem<StepSerialized, Step>(values.step);
+            object.version = deserializer.deserializeItem<VersionSerialized, Version>(values.version);
             object.commonCardData = deserializer.deserializeItem<CommonCardDataSerialized, CommonCardData>(values.commonCardData);
         }
     );

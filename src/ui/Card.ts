@@ -1,5 +1,5 @@
-import {ICard} from "./ICard";
-import {CommonCardData} from "./model/CommonCardData";
+import {ICard} from "../model/ICard";
+import {CommonCardData} from "../model/CommonCardData";
 
 /** the Card that composes the board. Made of anything that implements ICard,
  * like the hierarchical types (Journey, Step, Note), but also empty or button-like cards
@@ -60,7 +60,7 @@ export class Card {
         this._baseElement.delete();
     }
 
-    getId(): string {
+    get id(): string {
         return this._baseElement.id;
     }
 

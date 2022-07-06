@@ -1,38 +1,9 @@
-import React from 'react';
-import './App.css';
-import {Card} from "./Card";
-import {StoryMapper} from "./model/StoryMapper";
-
-interface PropsControls {
-    card: Card;
-    storyMapper: StoryMapper;
-}
-
-const Controls = ({card, storyMapper}: PropsControls) => {
-    if (card.showControls()) {
-        const createNewNext = () => {
-            card.createNewNext();
-            // building the board will trigger the page refresh
-            storyMapper.buildBoard();
-        };
-
-        const deleteCard = () => {
-            card.delete();
-            storyMapper.buildBoard();
-        };
-
-        const deleteButton = (card.canDelete()) ? <button onClick={deleteCard}>-</button> : <></>;
-
-        return (
-            <>
-                <button onClick={createNewNext}>+</button>
-                {deleteButton}
-            </>
-        );
-    } else {
-        return (<></>);
-    }
-};
+import React, {useEffect, useState} from 'react';
+import '../App.css';
+import {Card} from "../Card";
+import {StoryMapper} from "../../model/StoryMapper";
+import {Controls} from "./Controls";
+import {CardMainBody} from "./CardMainBody";
 
 interface PropsCardUI {
     card: Card;
@@ -40,9 +11,18 @@ interface PropsCardUI {
 }
 
 export const CardUI = ({card, storyMapper}: PropsCardUI) => {
+    /**
+     * if true, show edit form
+     */
+    const [editMode, setEditMode] = useState<boolean>(card.commonCardData.editMode);
+
+    useEffect(() => {
+        card.commonCardData.editMode = editMode;
+    }, [editMode]);
+
     const dragStartHandler = (event: React.DragEvent) => {
         storyMapper.setDraggedCard(card);
-        console.log(`started drag for ${card.getId()}`);
+        console.log(`started drag for ${card.id}`);
     };
 
     const dragOverHandler = (event: React.DragEvent) => {
@@ -50,7 +30,6 @@ export const CardUI = ({card, storyMapper}: PropsCardUI) => {
         if (draggedCard !== undefined) {
             if (draggedCard.canMoveInto(card)) {
                 event.preventDefault();
-                // console.log(`card ${event.dataTransfer.getData('card')} drag over ${card.getId()}`);
             }
         }
     };
@@ -65,6 +44,10 @@ export const CardUI = ({card, storyMapper}: PropsCardUI) => {
         }
     };
 
+    const clickHandler = () => {
+        setEditMode(!editMode);
+    };
+
     return (
         <td className={`card card${card.type}`}
             draggable={true}
@@ -73,13 +56,11 @@ export const CardUI = ({card, storyMapper}: PropsCardUI) => {
             onDrop={dropHandler}
         >
             <div className="content">
-                <div className="cardContent">
+                <div className="cardContent" onClick={clickHandler}>
                     <div className="cardPath">
                         {card.visiblePath}
                     </div>
-                    <div className="cardTitle">
-                        {card.commonCardData.title}
-                    </div>
+                    <CardMainBody commonCardData={card.commonCardData} editMode={editMode}/>
                 </div>
                 <div className="controls">
                     <Controls card={card} storyMapper={storyMapper}/>

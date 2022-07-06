@@ -1,8 +1,8 @@
 import {SmartArray} from "../SmartArray";
 import {Note, NoteSerialized} from "./Note";
-import {ICard} from "../../ICard";
+import {ICard} from "../ICard";
 import {Journey, JourneySerialized} from "./Journey";
-import {CardType} from "../../Card";
+import {CardType} from "../../ui/Card";
 import {ISerializable} from "../serialize/ISerializable";
 import {Serializer} from "../serialize/Serializer";
 import {ISerialized} from "../serialize/ISerialized";

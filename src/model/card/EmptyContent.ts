@@ -1,5 +1,5 @@
-import {ICard} from "../../ICard";
-import {CardType} from "../../Card";
+import {ICard} from "../ICard";
+import {CardType} from "../../ui/Card";
 import {CommonCardData} from "../CommonCardData";
 
 export class EmptyContent implements ICard {
