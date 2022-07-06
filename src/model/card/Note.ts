@@ -8,16 +8,16 @@ import {Serializer} from "../serialize/Serializer";
 import {ISerialized} from "../serialize/ISerialized";
 import {ISerializable} from "../serialize/ISerializable";
 import {Deserializer, DeserializerFunction} from "../serialize/Deserializer";
-import {CommonCardData} from "../CommonCardData";
+import {CommonCardData, CommonCardDataSerialized} from "../CommonCardData";
 
 export interface NoteSerialized {
-    name: string,
+    commonCardData: number,
     step: number,
     version: number
 }
 
 export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
-    private readonly name: string;
+
     private step?: Step;
     private version?: Version;
 
@@ -31,18 +31,23 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     /** Note path done with version: journey.version.positionInVersionStep */
     private pathWithVersion: string = "";
 
-    private readonly _commonCardData = new CommonCardData();
+    private _commonCardData = new CommonCardData();
 
     get commonCardData(): CommonCardData {
         return this._commonCardData;
     }
 
-    public static create(name: string,
+    set commonCardData(value: CommonCardData) {
+        this._commonCardData = value;
+    }
+
+    public static create(title: string,
                          step: Step,
                          version: Version,
                          pushInStep: boolean = false,
                          addToVersion: boolean = false): Note {
-        const note = new Note(name);
+        const note = new Note();
+        note.commonCardData.title = title;
         note.setStep(step);
         note.setVersion(version);
         if (pushInStep) {
@@ -55,20 +60,12 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         return note;
     }
 
-    constructor(name: string) {
-        this.name = name;
-    }
-
     setStep(step: Step) {
         this.step = step;
     }
 
     setVersion(version: Version) {
         this.version = version;
-    }
-
-    getTitle(): string {
-        return "some note title";
     }
 
     get visiblePath(): string {
@@ -151,11 +148,11 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     }
 
     toString(): string {
-        return this.path + "(" + this.name + ")";
+        return this.path + "(" + this.commonCardData.title + ")";
     }
 
     toStringVersion(): string {
-        return this.pathWithVersion + "(" + this.name + ")";
+        return this.pathWithVersion + "(" + this.commonCardData.title + ")";
     }
 
     getStep(): Step {
@@ -178,7 +175,7 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
 
     createNewNext(): void {
         if (this.step && this.version) {
-            const newNote = Note.create("new note", this.step, this.version, false, true);
+            const newNote = Note.create("a", this.step, this.version, false, true);
             this.step.add(newNote, this.positionInParent + 2);
         } else {
             throw new Error("Note doesn't have step and/or version");
@@ -220,7 +217,7 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
         return {
             type: Note.serializedTypeName(),
             value: {
-                name: this.name,
+                commonCardData: serializer.getObject(this.commonCardData),
                 step: serializer.getObject(this.step),
                 version: serializer.getObject(this.version)
             }
@@ -230,12 +227,11 @@ export class Note implements IPath, ICard, ISerializable<NoteSerialized> {
     public static serializedTypeName = () => 'Note';
 
     public static deserializerFunction = new DeserializerFunction<NoteSerialized, Note>(
-        (values: NoteSerialized) => {
-            return new Note(values.name);
-        },
+        (values: NoteSerialized) => new Note(),
         (object: Note, values: NoteSerialized, deserializer: Deserializer) => {
             object.setStep(deserializer.deserializeItem<StepSerialized, Step>(values.step));
             object.setVersion(deserializer.deserializeItem<VersionSerialized, Version>(values.version));
+            object.commonCardData = deserializer.deserializeItem<CommonCardDataSerialized, CommonCardData>(values.commonCardData);
         }
     );
 }

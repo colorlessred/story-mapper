@@ -21,7 +21,6 @@ export class Serializer {
      */
     public getJson(): string {
         const json = JSON.stringify(this.references);
-        console.log(json);
         return json;
     }
 

@@ -7,16 +7,17 @@ import {ISerializable} from "../serialize/ISerializable";
 import {Serializer} from "../serialize/Serializer";
 import {ISerialized} from "../serialize/ISerialized";
 import {Deserializer, DeserializerFunction} from "../serialize/Deserializer";
-import {CommonCardData} from "../CommonCardData";
+import {CommonCardData, CommonCardDataSerialized} from "../CommonCardData";
 
 export interface JourneySerialized {
     allJourneys?: number;
     steps: number [];
+    commonCardData: number;
 }
 
 export class Journey extends SmartArray<Step> implements ICard, ISerializable<JourneySerialized> {
     private _allJourneys?: AllJourneys;
-    private readonly _commonCardData = new CommonCardData();
+    private _commonCardData = new CommonCardData();
 
     static createAndPush(allJourneys: AllJourneys, step: Step): Journey {
         const journey = new Journey();
@@ -28,6 +29,10 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
 
     get commonCardData(): CommonCardData {
         return this._commonCardData;
+    }
+
+    set commonCardData(value: CommonCardData) {
+        this._commonCardData = value;
     }
 
     set allJourneys(allJourneys: AllJourneys) {
@@ -114,7 +119,8 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
             type: Journey.serializedTypeName(),
             value: {
                 allJourneys: serializer.getObject(this._allJourneys),
-                steps: this.items.map(step => serializer.getObject(step))
+                steps: this.items.map(step => serializer.getObject(step)),
+                commonCardData: serializer.getObject(this.commonCardData)
             }
         };
     }
@@ -131,6 +137,7 @@ export class Journey extends SmartArray<Step> implements ICard, ISerializable<Jo
             if (values.allJourneys) {
                 object.allJourneys = deserializer.deserializeItem<AllJourneysSerialized, AllJourneys>(values.allJourneys);
             }
+            object.commonCardData = deserializer.deserializeItem<CommonCardDataSerialized, CommonCardData>(values.commonCardData);
         }
     );
 }

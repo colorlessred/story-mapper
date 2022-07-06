@@ -7,19 +7,24 @@ import {ISerializable} from "../serialize/ISerializable";
 import {Serializer} from "../serialize/Serializer";
 import {ISerialized} from "../serialize/ISerialized";
 import {Deserializer, DeserializerFunction} from "../serialize/Deserializer";
-import {CommonCardData} from "../CommonCardData";
+import {CommonCardData, CommonCardDataSerialized} from "../CommonCardData";
 
 export interface StepSerialized {
     journey: number | undefined;
     notes: number[];
+    commonCardData: number;
 }
 
 export class Step extends SmartArray<Note> implements ICard, ISerializable<StepSerialized> {
     private journey?: Journey;
-    private readonly _commonCardData = new CommonCardData();
+    private _commonCardData = new CommonCardData();
 
     get commonCardData(): CommonCardData {
         return this._commonCardData;
+    }
+
+    set commonCardData(value: CommonCardData) {
+        this._commonCardData = value;
     }
 
     public static createAndPush(journey: Journey): Step {
@@ -38,7 +43,8 @@ export class Step extends SmartArray<Note> implements ICard, ISerializable<StepS
             type: Step.serializedTypeName(),
             value: {
                 journey: serializer.getObject(this.journey),
-                notes: this.items.map(note => serializer.getObject(note))
+                notes: this.items.map(note => serializer.getObject(note)),
+                commonCardData: serializer.getObject(this.commonCardData),
             }
         };
     }
@@ -57,6 +63,7 @@ export class Step extends SmartArray<Note> implements ICard, ISerializable<StepS
                     object.push(note);
                 });
             }
+            object.commonCardData = deserializer.deserializeItem<CommonCardDataSerialized, CommonCardData>(values.commonCardData);
         }
     );
 

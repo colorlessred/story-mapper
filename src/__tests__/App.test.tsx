@@ -556,9 +556,9 @@ describe("move", () => {
         // check
         const [n2after] = j1.firstStep.items;
         const [n1after, n3after] = j2.firstStep.items;
-        expect(n1.getTitle()).toEqual(n1after.getTitle());
-        expect(n2.getTitle()).toEqual(n2after.getTitle());
-        expect(n3.getTitle()).toEqual(n3after.getTitle());
+        expect(n1.commonCardData.title).toEqual(n1after.commonCardData.title);
+        expect(n2.commonCardData.title).toEqual(n2after.commonCardData.title);
+        expect(n3.commonCardData.title).toEqual(n3after.commonCardData.title);
     });
 
     it('move step, different journeys', () => {
@@ -609,8 +609,8 @@ describe("move", () => {
         const board: Board = sm.buildBoard();
         const note: Card = board.getCard(2, 1);
         const adder: Card = board.getCard(2, 2);
-        expect(note.getBaseElement() instanceof Note).toBeTruthy();
-        expect(adder.getBaseElement() instanceof EmptyAdder).toBeTruthy();
+        expect(note.baseElement instanceof Note).toBeTruthy();
+        expect(adder.baseElement instanceof EmptyAdder).toBeTruthy();
         expect(note.getId()).toEqual("1.1.1.1");
         expect(adder.getId()).toEqual("Adder.0.1");
         expect(note.canMoveInto(adder)).toBeTruthy();

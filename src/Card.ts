@@ -5,7 +5,7 @@ import {CommonCardData} from "./model/CommonCardData";
  * like the hierarchical types (Journey, Step, Note), but also empty or button-like cards
  */
 export class Card {
-    private readonly baseElement: ICard;
+    private readonly _baseElement: ICard;
     /**
      * unique key used by React
      * @private
@@ -13,11 +13,11 @@ export class Card {
     private key: string = "";
 
     constructor(baseElement: ICard) {
-        this.baseElement = baseElement;
+        this._baseElement = baseElement;
     }
 
-    getBaseElement() {
-        return this.baseElement;
+    get baseElement() {
+        return this._baseElement;
     }
 
     setKey(key: string) {
@@ -29,56 +29,47 @@ export class Card {
     }
 
     get commonCardData(): CommonCardData {
-        return this.baseElement.commonCardData;
+        return this._baseElement.commonCardData;
     }
 
-    //
-    // getContent(): string {
-    //     return this.baseElement.getCommonCardData().content;
-    // }
-    //
-    // getTitle(): string {
-    //     return this.baseElement.getCommonCardData().title;
-    // }
-
     get type(): string {
-        return CardType[this.baseElement.type];
+        return CardType[this._baseElement.type];
     }
 
     get visiblePath(): string {
-        return this.baseElement.visiblePath;
+        return this._baseElement.visiblePath;
     }
 
     toString(): string {
-        return this.baseElement.commonCardData.title;
+        return this._baseElement.commonCardData.title;
     }
 
     createNewNext(): void {
-        this.baseElement.createNewNext();
+        this._baseElement.createNewNext();
     }
 
     showControls(): boolean {
-        return this.baseElement.canShowControls();
+        return this._baseElement.canShowControls();
     }
 
     canDelete(): boolean {
-        return this.baseElement.canDelete();
+        return this._baseElement.canDelete();
     }
 
     delete(): void {
-        this.baseElement.delete();
+        this._baseElement.delete();
     }
 
     getId(): string {
-        return this.baseElement.id;
+        return this._baseElement.id;
     }
 
     canMoveInto(card: Card): boolean {
-        return this.baseElement.canMoveInto(card.baseElement);
+        return this._baseElement.canMoveInto(card._baseElement);
     }
 
     moveInto(card: Card): void {
-        this.baseElement.moveInto(card.baseElement);
+        this._baseElement.moveInto(card._baseElement);
     }
 }
 

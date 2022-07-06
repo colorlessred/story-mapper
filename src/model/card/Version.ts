@@ -10,13 +10,14 @@ import {Serializer} from "../serialize/Serializer";
 import {ISerialized} from "../serialize/ISerialized";
 import {ISerializable} from "../serialize/ISerializable";
 import {Deserializer, DeserializerFunction} from "../serialize/Deserializer";
-import {CommonCardData} from "../CommonCardData";
+import {CommonCardData, CommonCardDataSerialized} from "../CommonCardData";
 
 export interface VersionSerialized {
     name: string,
     notes: (number | undefined)[],
     allJourneys?: number,
     allVersions?: number;
+    commonCardData: number;
 }
 
 /**
@@ -33,10 +34,14 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
     private notesInStep: NotesInSteps;
     private allVersions?: AllVersions;
 
-    private readonly _commonCardData = new CommonCardData();
+    private _commonCardData = new CommonCardData();
 
     get commonCardData(): CommonCardData {
         return this._commonCardData;
+    }
+
+    set commonCardData(value: CommonCardData) {
+        this._commonCardData = value;
     }
 
     static createAndPush(name: string, allJourneys: AllJourneys): Version {
@@ -215,7 +220,8 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
                 name: this.name,
                 notes: Array.from(this.notes.values()).map(note => serializer.getObject(note)),
                 allJourneys: serializer.getObject(this.allJourneys),
-                allVersions: serializer.getObject(this.allVersions)
+                allVersions: serializer.getObject(this.allVersions),
+                commonCardData: serializer.getObject(this.commonCardData),
             }
         };
     }
@@ -238,6 +244,7 @@ export class Version implements IPath, ICard, ISerializable<VersionSerialized> {
                     object.addNote(deserializer.deserializeItem<NoteSerialized, Note>(note));
                 }
             });
+            object.commonCardData = deserializer.deserializeItem<CommonCardDataSerialized, CommonCardData>(values.commonCardData);
         },
         (object: Version) => {
             // rebuild at the end, because it might not have been done since the Notes where not ready (missing their Step)

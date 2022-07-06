@@ -10,6 +10,7 @@ import {Version} from "../model/card/Version";
 import {AllJourneys} from "../model/AllJourneys";
 import {Journey} from "../model/card/Journey";
 import {stringify} from "flatted";
+import {CommonCardData} from "../model/CommonCardData";
 
 const logAndCompare = (actual: string, expected: string) => {
     if (actual !== expected) {
@@ -52,9 +53,9 @@ describe('serializer', () => {
         const a = new TestClass("abc", true, 1234);
         const serializer = new Serializer(a);
 
-        expect(serializer.getJson()).toEqual(
-            '[{"type":"TestClass","value":{"fieldString":"abc","fieldBoolean":true,"fieldNumber":1234}}]'
-        );
+        logAndCompare(
+            serializer.getJson(),
+            '[{"type":"TestClass","value":{"fieldString":"abc","fieldBoolean":true,"fieldNumber":1234}}]');
     });
 
     it('class with references', () => {
@@ -115,10 +116,9 @@ describe('serializer', () => {
         Note.create("c", s2_1, v2, true, true);
 
         const serializer = new Serializer(sm);
-        const json = serializer.getJson();
-        // console.log(json);
-        expect(json).toEqual(
-            '[{"type":"StoryMapper","value":{"allJourneys":1,"allVersions":7}},{"type":"AllJourneys","value":{"journeys":[2,11]}},{"type":"Journey","value":{"allJourneys":1,"steps":[3,12,13]}},{"type":"Step","value":{"journey":2,"notes":[4,6]}},{"type":"Note","value":{"name":"a","step":3,"version":5}},{"type":"Version","value":{"name":"v1","notes":[4,6],"allJourneys":1,"allVersions":7}},{"type":"Note","value":{"name":"b","step":3,"version":5}},{"type":"AllVersions","value":{"versions":[5,8]}},{"type":"Version","value":{"name":"v2","notes":[9],"allJourneys":1,"allVersions":7}},{"type":"Note","value":{"name":"c","step":10,"version":8}},{"type":"Step","value":{"journey":11,"notes":[9]}},{"type":"Journey","value":{"allJourneys":1,"steps":[10]}},{"type":"Step","value":{"journey":2,"notes":[]}},{"type":"Step","value":{"journey":2,"notes":[]}}]');
+        logAndCompare(
+            serializer.getJson(),
+            '[{"type":"StoryMapper","value":{"allJourneys":1,"allVersions":9}},{"type":"AllJourneys","value":{"journeys":[2,14]}},{"type":"Journey","value":{"allJourneys":1,"steps":[3,20,22],"commonCardData":24}},{"type":"Step","value":{"journey":2,"notes":[4,7],"commonCardData":19}},{"type":"Note","value":{"commonCardData":5,"step":3,"version":6}},{"type":"CommonCardData","value":{"title":"a","content":"","editMode":false}},{"type":"Version","value":{"name":"v1","notes":[4,7],"allJourneys":1,"allVersions":9,"commonCardData":18}},{"type":"Note","value":{"commonCardData":8,"step":3,"version":6}},{"type":"CommonCardData","value":{"title":"b","content":"","editMode":false}},{"type":"AllVersions","value":{"versions":[6,10]}},{"type":"Version","value":{"name":"v2","notes":[11],"allJourneys":1,"allVersions":9,"commonCardData":17}},{"type":"Note","value":{"commonCardData":12,"step":13,"version":10}},{"type":"CommonCardData","value":{"title":"c","content":"","editMode":false}},{"type":"Step","value":{"journey":14,"notes":[11],"commonCardData":16}},{"type":"Journey","value":{"allJourneys":1,"steps":[13],"commonCardData":15}},{"type":"CommonCardData","value":{"title":"","content":"","editMode":false}},{"type":"CommonCardData","value":{"title":"","content":"","editMode":false}},{"type":"CommonCardData","value":{"title":"","content":"","editMode":false}},{"type":"CommonCardData","value":{"title":"","content":"","editMode":false}},{"type":"CommonCardData","value":{"title":"","content":"","editMode":false}},{"type":"Step","value":{"journey":2,"notes":[],"commonCardData":21}},{"type":"CommonCardData","value":{"title":"","content":"","editMode":false}},{"type":"Step","value":{"journey":2,"notes":[],"commonCardData":23}},{"type":"CommonCardData","value":{"title":"","content":"","editMode":false}},{"type":"CommonCardData","value":{"title":"","content":"","editMode":false}}]');
     });
 });
 
@@ -200,7 +200,7 @@ describe("deserialize", () => {
         const s2_1 = j2.firstStep;
         const v1 = sm.addVersion("v1");
         const v2 = sm.addVersion("v2");
-        Note.create("a", s1_1, v1, true, true);
+        Note.create("a", s1_1, v1, true, true).commonCardData.title = 'title n1';
         Note.create("b", s1_1, v1, true, true);
         Note.create("c", s2_1, v2, true, true);
 
@@ -216,6 +216,7 @@ describe("deserialize", () => {
         deserializer.addDeserializer(Journey.serializedTypeName(), Journey.deserializerFunction);
         deserializer.addDeserializer(Step.serializedTypeName(), Step.deserializerFunction);
         deserializer.addDeserializer(Note.serializedTypeName(), Note.deserializerFunction);
+        deserializer.addDeserializer(CommonCardData.serializedTypeName(), CommonCardData.deserializerFunction);
 
         const sm2 = deserializer.deserialize<StoryMapperSerialized, StoryMapper>();
 
