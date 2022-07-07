@@ -44,8 +44,16 @@ export const CardUI = ({card, storyMapper}: PropsCardUI) => {
         }
     };
 
-    const clickHandler = () => {
-        setEditMode(!editMode);
+    /**
+     * click to edit, ctrl-click to stop
+     * @param e
+     */
+    const clickHandler = (e: React.MouseEvent) => {
+        if (!editMode) {
+            setEditMode(true);
+        } else if (e.ctrlKey) {
+            setEditMode(false);
+        }
     };
 
     return (

@@ -20,9 +20,9 @@ function App() {
         setJson(e.target.value);
     };
 
-    useEffect(()=>{
-        setStoryMapper(storyMapper);
-    }, [storyMapper]);
+    // useEffect(()=>{
+    //     setStoryMapper(storyMapper);
+    // }, [storyMapper]);
 
     return (
         <div className="App">
