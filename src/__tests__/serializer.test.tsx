@@ -168,7 +168,7 @@ describe("deserialize", () => {
         }
 
         const json = '[{"type":"TestClass","value":{"name":"a","parent":1}},{"type":"TestClass","value":{"name":"c","parent":2}},{"type":"TestClass","value":{"name":"b","parent":0}}]';
-        const deserializer = new Deserializer(json);
+        const deserializer = new Deserializer();
 
         deserializer.addDeserializer('TestClass', TestClass.deserializerFunction);
 
@@ -180,7 +180,7 @@ describe("deserialize", () => {
             return obj.parent;
         };
 
-        const a: TestClass | undefined = deserializer.deserialize<TestClassSerialized, TestClass>();
+        const a: TestClass | undefined = deserializer.deserialize<TestClassSerialized, TestClass>(json);
         const c = checkAndReturnParent(a, "a");
         const b = checkAndReturnParent(c, "c");
         const aNew = checkAndReturnParent(b, "b");
@@ -207,18 +207,19 @@ describe("deserialize", () => {
         const json = new Serializer(sm).getJson();
 
         // deserialize
-        const deserializer = new Deserializer(json);
-        // TODO: better way to add these? "static interface"?
-        deserializer.addDeserializer(StoryMapper.serializedTypeName(), StoryMapper.deserializerFunction);
-        deserializer.addDeserializer(AllVersions.serializedTypeName(), AllVersions.deserializerFunction);
-        deserializer.addDeserializer(Version.serializedTypeName(), Version.deserializerFunction);
-        deserializer.addDeserializer(AllJourneys.serializedTypeName(), AllJourneys.deserializerFunction);
-        deserializer.addDeserializer(Journey.serializedTypeName(), Journey.deserializerFunction);
-        deserializer.addDeserializer(Step.serializedTypeName(), Step.deserializerFunction);
-        deserializer.addDeserializer(Note.serializedTypeName(), Note.deserializerFunction);
-        deserializer.addDeserializer(CommonCardData.serializedTypeName(), CommonCardData.deserializerFunction);
-
-        const sm2 = deserializer.deserialize<StoryMapperSerialized, StoryMapper>();
+        // const deserializer = new Deserializer();
+        // // TODO: better way to add these? "static interface"?
+        // deserializer.addDeserializer(StoryMapper.serializedTypeName(), StoryMapper.deserializerFunction);
+        // deserializer.addDeserializer(AllVersions.serializedTypeName(), AllVersions.deserializerFunction);
+        // deserializer.addDeserializer(Version.serializedTypeName(), Version.deserializerFunction);
+        // deserializer.addDeserializer(AllJourneys.serializedTypeName(), AllJourneys.deserializerFunction);
+        // deserializer.addDeserializer(Journey.serializedTypeName(), Journey.deserializerFunction);
+        // deserializer.addDeserializer(Step.serializedTypeName(), Step.deserializerFunction);
+        // deserializer.addDeserializer(Note.serializedTypeName(), Note.deserializerFunction);
+        // deserializer.addDeserializer(CommonCardData.serializedTypeName(), CommonCardData.deserializerFunction);
+        //
+        // const sm2 = deserializer.deserialize<StoryMapperSerialized, StoryMapper>(json);
+        const sm2 = StoryMapper.deserialize(json);
 
         const allVersions1 = sm.getAllVersions().items;
         const allVersions2 = sm2.getAllVersions().items;

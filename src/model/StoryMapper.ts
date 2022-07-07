@@ -14,6 +14,7 @@ import {ISerializable} from "./serialize/ISerializable";
 import {Serializer} from "./serialize/Serializer";
 import {ISerialized} from "./serialize/ISerialized";
 import {Deserializer, DeserializerFunction} from "./serialize/Deserializer";
+import {StoryMapperDeserializer} from "./StoryMapperDeserializer";
 
 export interface StoryMapperSerialized {
     allJourneys?: number,
@@ -22,6 +23,7 @@ export interface StoryMapperSerialized {
 
 /** class the represents the full model */
 export class StoryMapper implements ISerializable<StoryMapperSerialized> {
+
 
     private allJourneys: AllJourneys = new AllJourneys();
     private allVersions: AllVersions = new AllVersions();
@@ -167,4 +169,20 @@ export class StoryMapper implements ISerializable<StoryMapperSerialized> {
             }
         }
     );
+
+    /**
+     * NB!!!: this needs to be here, otherwise it references serializedTypeName which has not yet
+     * been initialized and it fails at run time (really???)
+     * @private
+     */
+    private static _deserializer: StoryMapperDeserializer = new StoryMapperDeserializer();
+
+    /**
+     * parse json and return StoryMapper
+     * @param json
+     */
+    public static deserialize(json: string): StoryMapper {
+        return StoryMapper._deserializer.deserialize(json);
+    };
+
 }

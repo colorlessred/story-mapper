@@ -74,6 +74,10 @@ div.cardTitle {
     font-size: 12px;
 }
 
+textarea {
+    border: 0px solid #aaa;
+}
+
 @media print {
     button {
         display: none;

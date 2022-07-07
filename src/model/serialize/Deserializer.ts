@@ -57,15 +57,7 @@ export class Deserializer {
      * root object
      * @private
      */
-    private readonly items: ArrayOfSerialized<any>;
-
-    /**
-     * instantiate Deserializer from JSON string
-     * @param json
-     */
-    constructor(json: string) {
-        this.items = JSON.parse(json);
-    }
+    private items: ArrayOfSerialized<any> = [];
 
     /**
      * add a deserializer for a particular type
@@ -112,7 +104,8 @@ export class Deserializer {
     /**
      * deserialize, starting from the first element of the array as root
      */
-    deserialize<T, S extends ISerializable<T>>(): S {
+    deserialize<T, S extends ISerializable<T>>(json: string): S {
+        this.items = JSON.parse(json);
         // deserialize the first element, which is always the root
         // this will trigger the deserialization of all the needed dependencies
         return this.deserializeItem<T, S>(0);

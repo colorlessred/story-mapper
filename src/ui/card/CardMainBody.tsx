@@ -10,6 +10,9 @@ export const CardMainBody = ({commonCardData, editMode}: PropsCardMainBody) => {
     const [title, setTitle] = useState<string>(commonCardData.title);
 
     useEffect(() => {
+        // if the commonCardData changes (a different instance) we need
+        // to reload the title. Otherwise the Card will "keep" its data on
+        // UI even if you move the Notes around
         setTitle(commonCardData.title);
     }, [commonCardData]);
 
