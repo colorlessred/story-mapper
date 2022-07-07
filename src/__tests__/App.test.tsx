@@ -490,7 +490,14 @@ describe("move", () => {
         return [sm, j1, j2, v1, v2];
     }
 
-    const DEFAULT_SM: string = "[[Empty,J1,Empty,Empty,J2][Empty,S1.1,S1.2,S1.3,S2.1][V1,1.1.1.1/a,Adder.0.1,Adder.0.2,Adder.0.0][Empty,1.1.1.2/b,Empty,Empty,Empty][V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1/c]]";
+    const DEFAULT_SM: string =
+        "[" +
+        "[Empty,J1,Empty,Empty,J2]" +
+        "[Empty,S1.1,S1.2,S1.3,S2.1]" +
+        "[V1,1.1.1.1/a,Adder.0.1,Adder.0.2,Adder.0.0]" +
+        "[Empty,1.1.1.2/b,Empty,Empty,Empty]" +
+        "[V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1/c]" +
+        "]";
 
     it('default', () => {
         // default case without any modifications
@@ -534,12 +541,7 @@ describe("move", () => {
         n1.moveInto(n3);
         // // the resulting paths are the same because they have been regenerated
         expect(sm.buildBoard().toString()).toEqual(
-            "[[Empty,J1,Empty,Empty,J2]" +
-            "[Empty,S1.1,S1.2,S1.3,S2.1]" +
-            "[V1,1.1.1.1,Adder.0.1,Adder.0.2,Adder.0.0]" +
-            "[V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1]" +
-            "[Empty,Empty,Empty,Empty,2.1.2.2]" +
-            "]");
+            "[[Empty,J1,Empty,Empty,J2][Empty,S1.1,S1.2,S1.3,S2.1][V1,1.1.1.1/b,Adder.0.1,Adder.0.2,Adder.0.0][V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1/a][Empty,Empty,Empty,Empty,2.1.2.2/c]]");
         // check
         const [n2after] = j1.firstStep.items;
         const [n1after, n3after] = j2.firstStep.items;
@@ -556,13 +558,13 @@ describe("move", () => {
         // s2 cannot be removed from j2, since it's the only one
         expect(s2.canMoveInto(s1)).toEqual(false);
         s1.moveInto(s2);
-        // // the resulting paths are the same because they have been regenerated
+        // the resulting paths are the same because they have been regenerated
         expect(sm.buildBoard().toString()).toEqual(
             "[[Empty,J1,Empty,J2,Empty]" +
             "[Empty,S1.1,S1.2,S2.1,S2.2]" +
-            "[V1,Adder.0.0,Adder.0.1,2.1.1.1,Adder.0.1]" +
-            "[Empty,Empty,Empty,2.1.1.2,Empty]" +
-            "[V2,Adder.1.0,Adder.1.1,Adder.1.0,2.2.2.1]]");
+            "[V1,Adder.0.0,Adder.0.1,2.1.1.1/a,Adder.0.1]" +
+            "[Empty,Empty,Empty,2.1.1.2/b,Empty]" +
+            "[V2,Adder.1.0,Adder.1.1,Adder.1.0,2.2.2.1/c]]");
     });
 
     it('move journey', () => {
@@ -571,11 +573,12 @@ describe("move", () => {
         expect(j2.canMoveInto(j1)).toEqual(true);
         j2.moveInto(j1);
         expect(sm.buildBoard().toString()).toEqual(
-            "[[Empty,J1,J2,Empty,Empty]" +
+            "[" +
+            "[Empty,J1,J2,Empty,Empty]" +
             "[Empty,S1.1,S2.1,S2.2,S2.3]" +
-            "[V1,Adder.0.0,2.1.1.1,Adder.0.1,Adder.0.2]" +
-            "[Empty,Empty,2.1.1.2,Empty,Empty]" +
-            "[V2,1.1.2.1,Adder.1.0,Adder.1.1,Adder.1.2]]");
+            "[V1,Adder.0.0,2.1.1.1/a,Adder.0.1,Adder.0.2]" +
+            "[Empty,Empty,2.1.1.2/b,Empty,Empty]" +
+            "[V2,1.1.2.1/c,Adder.1.0,Adder.1.1,Adder.1.2]]");
     });
 
     it('move version', () => {
@@ -584,11 +587,12 @@ describe("move", () => {
         expect(v2.canMoveInto(v1)).toEqual(true);
         v2.moveInto(v1);
         expect(sm.buildBoard().toString()).toEqual(
-            "[[Empty,J1,Empty,Empty,J2]" +
+            "[" +
+            "[Empty,J1,Empty,Empty,J2]" +
             "[Empty,S1.1,S1.2,S1.3,S2.1]" +
-            "[V1,Adder.0.0,Adder.0.1,Adder.0.2,2.1.1.1]" +
-            "[V2,1.1.2.1,Adder.1.1,Adder.1.2,Adder.1.0]" +
-            "[Empty,1.1.2.2,Empty,Empty,Empty]]");
+            "[V1,Adder.0.0,Adder.0.1,Adder.0.2,2.1.1.1/c]" +
+            "[V2,1.1.2.1/a,Adder.1.1,Adder.1.2,Adder.1.0]" +
+            "[Empty,1.1.2.2/b,Empty,Empty,Empty]]");
     });
 
     it('move into adder', () => {
@@ -603,10 +607,14 @@ describe("move", () => {
         expect(note.canMoveInto(adder)).toBeTruthy();
         note.moveInto(adder);
         expect(sm.buildBoard().toString()).toEqual(
-            "[[Empty,J1,Empty,Empty,J2]" +
+            "[" +
+            "[Empty,J1,Empty,Empty,J2]" +
             "[Empty,S1.1,S1.2,S1.3,S2.1]" +
-            "[V1,1.1.1.1,1.2.1.1,Adder.0.2,Adder.0.0]" +
-            "[V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1]]");
+            "[V1,1.1.1.1/b,1.2.1.1/a,Adder.0.2,Adder.0.0]" +
+            "[V2,Adder.1.0,Adder.1.1,Adder.1.2,2.1.2.1/c]" +
+            "]");
+
+
     });
 
 });
