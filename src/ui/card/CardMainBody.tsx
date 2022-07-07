@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {CommonCardData} from "../../model/CommonCardData";
 
 interface PropsCardMainBody {
@@ -8,6 +8,10 @@ interface PropsCardMainBody {
 
 export const CardMainBody = ({commonCardData, editMode}: PropsCardMainBody) => {
     const [title, setTitle] = useState<string>(commonCardData.title);
+
+    useEffect(() => {
+        setTitle(commonCardData.title);
+    }, [commonCardData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newTitle = e.target.value;
