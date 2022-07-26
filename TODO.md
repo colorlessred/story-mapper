@@ -1,10 +1,8 @@
 # TODO
-
-- TS and tests setup
-- pure TS management of data structure (steps and versions)
-- create of visual data structure (matrix of equal sized boxes)
-- handling of UI manipulation (drag and drop)
-- editing of notes
-- summing story points
-- "add" buttons
-
+- add story points and sum them up on the version, step and journey
+- add backend to load and save json
+- image attachments for notes (UI + backend)
+- description fields
+- ability to show/hide versions
+- add JIRA issue name, and global way to set prefix to be used by create the JIRA URLs
+- fix bug when adding more than 10 elements (sorting for 1.10 is alphabetical, which is wrong)
