@@ -17,10 +17,10 @@
     "flatted": "^3.2.6"
   },
   "scripts": {
-    "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts build",
-    "test": "react-scripts test src/__tests__/*.tsx",
-    "eject": "react-scripts eject"
+    "start": "../node_modules/.bin/react-scripts --openssl-legacy-provider start",
+    "build": "../node_modules/.bin/react-scripts ui/build",
+    "test": "../node_modules/.bin/react-scripts test src/__tests__/*.tsx",
+    "eject": "../node_modules/.bin/react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
